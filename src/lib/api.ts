@@ -25,7 +25,9 @@ async function pedir<T>(url: string, init?: RequestInit): Promise<T> {
   const esJson = (res.headers.get("content-type") || "").includes("application/json");
   const datos = esJson ? await res.json().catch(() => ({})) : {};
   if (!esJson || !res.ok || datos.ok === false) {
-    throw new Error(datos.mensaje || "No pudimos completar esto. Intente de nuevo.");
+    const error = new Error(datos.mensaje || "No pudimos completar esto. Intente de nuevo.") as Error & { usado?: boolean };
+    error.usado = datos.usado === true;
+    throw error;
   }
   return datos as T;
 }
@@ -47,6 +49,42 @@ export const avisarAgendo = (e: string, correo: string, cupo: string, cuando: st
 
 export const crearReferido = (e: string, correo: string) =>
   pedir<{ ok: true; e: string }>("/api/config/referido", { method: "POST", body: JSON.stringify({ e, correo }) });
+
+// ---------- El juego (camino Mejorar resultados) ----------
+
+export interface Subtema {
+  id: string;
+  asignatura: string;
+  tema: string;
+  subtema: string;
+}
+
+export interface PreguntaJuego {
+  id: string;
+  question: string;
+  options: string[];
+  imageUrl?: string;
+}
+
+export interface Partida {
+  partida: string;
+  estudiante: { uid: string; nombre: string; curso: string; avatar: string };
+  asignatura: string;
+  tema: string;
+  subtema: string;
+  preguntas: PreguntaJuego[];
+}
+
+export const leerSubtemas = () => pedir<{ subtemas: Subtema[]; minutos: number[] }>("/api/config/jugar");
+
+export const empezarPartida = (e: string, subtema: string, minutos: number) =>
+  pedir<Partida>("/api/config/jugar", { method: "POST", body: JSON.stringify({ e, accion: "empezar", subtema, minutos }) });
+
+export const responderPregunta = (e: string, partida: string, pregunta_id: string, opcion: number, segundos: number) =>
+  pedir<{ correcta: boolean; correctAnswer: number; retroalimentacion: string; fin: boolean }>("/api/config/jugar", {
+    method: "POST",
+    body: JSON.stringify({ e, accion: "responder", partida, pregunta_id, opcion, segundos }),
+  });
 
 export interface DiaAgenda {
   fecha: string;

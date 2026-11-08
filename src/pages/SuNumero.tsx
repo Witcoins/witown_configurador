@@ -20,6 +20,8 @@ export function SuNumero() {
     contacto: { nombre: k.nombre, cargo: k.cargo, telefono: k.telefono, correo: k.correo },
     estudiantes: estado.estudiantes,
     rutas: estado.ruta ? [estado.ruta] : [],
+    niveles: estado.logbooks.cursos,
+    ...(estado.actualConfirmado ? { actual: estado.actual } : {}),
     funcionalidades: estado.prendidas,
     plan: c.plan.nombre,
     con_logbooks: c.conLogbooks,

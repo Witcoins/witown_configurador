@@ -8,7 +8,8 @@
     "build": "tsc --noEmit -p tsconfig.app.json && vite build",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "preview": "vite preview",
-    "canal": "node scripts/canal.mjs"
+    "canal": "node scripts/canal.mjs",
+    "vitrinas": "node scripts/vitrinas.mjs"
   },
   "dependencies": {
     "jspdf": "^4.2.1",

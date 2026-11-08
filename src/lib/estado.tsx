@@ -32,6 +32,14 @@ export interface Estado {
   contacto: Contacto;
   leadEnviado: boolean;
   agendo: string | null;
+  /** El "¿Qué tiene hoy?" del camino Ahorrar costos ya se respondió. */
+  actualConfirmado: boolean;
+  /** Áreas y cursos con Logbooks propios (camino Contenido). */
+  logbooks: { areas: string[]; cursos: string[]; color: string; plantilla: string };
+  /** Logo del colegio como data URL. Solo en memoria: no se guarda ni se sube. */
+  logo: string | null;
+  /** El enlace ya usó su única partida (en cualquier camino). */
+  jugo: boolean;
 }
 
 type Accion =
@@ -43,7 +51,11 @@ type Accion =
   | { tipo: "actual"; valor: Partial<Actual> }
   | { tipo: "contacto"; valor: Partial<Contacto> }
   | { tipo: "leadEnviado" }
-  | { tipo: "agendo"; cuando: string };
+  | { tipo: "agendo"; cuando: string }
+  | { tipo: "actualConfirmado" }
+  | { tipo: "logbooks"; valor: Partial<Estado["logbooks"]> }
+  | { tipo: "logo"; valor: string | null }
+  | { tipo: "jugo" };
 
 function inicial(enlace: Enlace): Estado {
   return {
@@ -61,6 +73,10 @@ function inicial(enlace: Enlace): Estado {
     contacto: { colegio: enlace.colegio, nombre: "", cargo: "", telefono: "", correo: "", autoriza: false },
     leadEnviado: false,
     agendo: null,
+    actualConfirmado: false,
+    logbooks: { areas: [], cursos: [], color: "#6d28d9", plantilla: "clasica" },
+    logo: null,
+    jugo: enlace.generaciones_restantes <= 0,
   };
 }
 
@@ -87,6 +103,14 @@ function reducir(s: Estado, a: Accion): Estado {
       return { ...s, leadEnviado: true };
     case "agendo":
       return { ...s, agendo: a.cuando };
+    case "actualConfirmado":
+      return { ...s, actualConfirmado: true };
+    case "logbooks":
+      return { ...s, logbooks: { ...s.logbooks, ...a.valor } };
+    case "logo":
+      return { ...s, logo: a.valor };
+    case "jugo":
+      return { ...s, jugo: true };
   }
 }
 
@@ -108,7 +132,7 @@ export function ProveedorEstado({ enlace, children }: { enlace: Enlace; children
   const [estado, despachar] = useReducer(reducir, enlace, (en) => {
     try {
       const guardado = sessionStorage.getItem(claveDe(en.e));
-      if (guardado) return { ...inicial(en), ...JSON.parse(guardado) } as Estado;
+      if (guardado) return { ...inicial(en), ...JSON.parse(guardado), logo: null } as Estado;
     } catch {
       /* sin almacenamiento: se empieza de cero */
     }
@@ -117,7 +141,8 @@ export function ProveedorEstado({ enlace, children }: { enlace: Enlace; children
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(claveDe(enlace.e), JSON.stringify(estado));
+      // El logo no se guarda: puede pesar más que el cupo de sessionStorage.
+      sessionStorage.setItem(claveDe(enlace.e), JSON.stringify({ ...estado, logo: null }));
     } catch {
       /* no pasa nada */
     }
