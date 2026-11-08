@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "tsc --noEmit -p tsconfig.app.json && vite build",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "canal": "node scripts/canal.mjs"
   },
   "dependencies": {
+    "jspdf": "^4.2.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
