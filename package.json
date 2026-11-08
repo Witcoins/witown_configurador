@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "preview": "vite preview",
     "canal": "node scripts/canal.mjs",
-    "vitrinas": "node scripts/vitrinas.mjs"
+    "vitrinas": "node scripts/vitrinas.mjs",
+    "local": "node scripts/local.mjs"
   },
   "dependencies": {
     "jspdf": "^4.2.1",
