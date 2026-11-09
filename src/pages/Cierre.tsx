@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useConfigurador } from "@/lib/estado";
 import { agendar, avisarAgendo, crearReferido, leerHoras, type DiaAgenda } from "@/lib/api";
 import { medir } from "@/lib/analitica";
+import { avanzar, useAvance } from "@/lib/progreso";
 import { descargarResumen } from "@/lib/pdf";
 
 /** Termina siempre en una acción con fecha: agendar o hablar por WhatsApp. */
 export function Cierre() {
   const { enlace, estado, cotizacion: c, despachar } = useConfigurador();
   const k = estado.contacto;
+  useAvance("cierre", 80);
   const [dias, setDias] = useState<DiaAgenda[] | null>(null);
   const [dia, setDia] = useState<string>("");
   const [error, setError] = useState("");
@@ -33,6 +35,7 @@ export function Cierre() {
       const cuando = `${dias?.find((d) => d.fecha === dia)?.rotulo ?? dia}, ${rotulo}`;
       despachar({ tipo: "agendo", cuando });
       medir("agendo");
+      avanzar(enlace.e, "agendo", 90);
       await avisarAgendo(enlace.e, k.correo, cupo, cuando).catch(() => undefined);
     } catch (e) {
       setError(e instanceof Error ? e.message : "No pudimos agendar.");
@@ -56,6 +59,7 @@ export function Cierre() {
       const r = await crearReferido(enlace.e, estado.contacto.correo);
       setReferido(`${location.origin}${location.pathname}?e=${r.e}`);
       medir("referido");
+      avanzar(enlace.e, "referido", 87);
     } catch (e) {
       setError(e instanceof Error ? e.message : "No pudimos crear el enlace.");
     }
@@ -107,12 +111,12 @@ export function Cierre() {
 
       <div className="flex flex-col gap-2 sm:flex-row">
         {whatsapp && (
-          <a href={whatsapp} target="_blank" rel="noopener noreferrer" onClick={() => medir("whatsapp")}
+          <a href={whatsapp} target="_blank" rel="noopener noreferrer" onClick={() => { medir("whatsapp"); avanzar(enlace.e, "whatsapp", 86); }}
             className="flex-1 rounded-xl border border-green-600 px-5 py-3 text-center font-semibold text-green-800 hover:bg-green-50">
             Hablar por WhatsApp con mi asesora
           </a>
         )}
-        <button onClick={() => { medir("pdf"); void descargarResumen(estado, c, enlace.asesora.nombre); }}
+        <button onClick={() => { medir("pdf"); avanzar(enlace.e, "pdf", 85); void descargarResumen(estado, c, enlace.asesora.nombre); }}
           className="flex-1 rounded-xl border border-purple-300 px-5 py-3 font-semibold text-purple-800 hover:bg-purple-50">
           Descargar resumen en PDF
         </button>

@@ -57,6 +57,11 @@ createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PUERTO}`);
   const ruta = decodeURIComponent(url.pathname);
 
+  // En el emulador, Storage falla por un permiso que en producción no aplica:
+  // para ver la portada en local, FOTO_LOCAL=<archivo> sirve esa foto.
+  if (url.pathname === "/api/config/imagen" && url.searchParams.get("tipo") === "foto" && process.env.FOTO_LOCAL) {
+    return archivo(res, process.env.FOTO_LOCAL);
+  }
   const fn = funcionDe(url.pathname);
   if (fn) return reenviar(req, res, `${EMULADOR}/${fn}${url.pathname}${url.search}`);
   if (url.pathname === "/api/horas") return reenviar(req, res, "https://ecosistema-iwitown.web.app/api/horas");

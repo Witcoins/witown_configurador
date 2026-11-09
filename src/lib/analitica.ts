@@ -53,11 +53,12 @@ export function decidirMedicion(acepta: boolean) {
   if (acepta) cargar();
 }
 
+/** Carga GA4. Solo se llama cuando el rector aceptó los términos en esta demo. */
 export function iniciarMedicion() {
-  if (decisionMedicion() === "si") cargar();
+  cargar();
 }
 
 export function medir(paso: string, extra: Record<string, string | number> = {}) {
-  if (decisionMedicion() !== "si" || !window.gtag) return;
+  if (!cargado || !window.gtag) return;
   window.gtag("event", "configurador_paso", { paso, ...extra });
 }

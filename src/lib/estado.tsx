@@ -4,7 +4,7 @@ import { PRESETS } from "@/config/funcionalidades";
 import { cotizar, type Cotizacion } from "@/lib/precio";
 import type { Enlace, Ruta } from "@/lib/api";
 
-export type Paso = "entrada" | "camino" | "numero" | "cierre";
+export type Paso = "entrada" | "camino" | "plan" | "numero" | "cierre";
 
 export interface Actual {
   editorial: string;
@@ -40,6 +40,14 @@ export interface Estado {
   logo: string | null;
   /** El enlace ya usó su única partida (en cualquier camino). */
   jugo: boolean;
+  /** En qué escena del camino va. */
+  escena: number;
+  /** La tarea que eligió como docente (camino Mejorar resultados). */
+  tarea: { asignatura: string; tema: string; subtema: string; minutos: number };
+  /** Aceptó los términos (y que se registre hasta dónde llega). Sin esto no se mide nada. */
+  acepto: boolean;
+  /** Ya respondió cuántos estudiantes tiene (se pregunta antes del precio). */
+  estudiantesConfirmado: boolean;
 }
 
 type Accion =
@@ -55,7 +63,11 @@ type Accion =
   | { tipo: "actualConfirmado" }
   | { tipo: "logbooks"; valor: Partial<Estado["logbooks"]> }
   | { tipo: "logo"; valor: string | null }
-  | { tipo: "jugo" };
+  | { tipo: "jugo" }
+  | { tipo: "escena"; valor: number }
+  | { tipo: "tarea"; valor: Partial<Estado["tarea"]> }
+  | { tipo: "acepto" }
+  | { tipo: "estudiantesConfirmado" };
 
 function inicial(enlace: Enlace): Estado {
   return {
@@ -77,6 +89,10 @@ function inicial(enlace: Enlace): Estado {
     logbooks: { areas: [], cursos: [], color: "#6d28d9", plantilla: "clasica" },
     logo: null,
     jugo: enlace.generaciones_restantes <= 0,
+    escena: 0,
+    tarea: { asignatura: "", tema: "", subtema: "", minutos: 10 },
+    acepto: false,
+    estudiantesConfirmado: false,
   };
 }
 
@@ -87,7 +103,7 @@ function reducir(s: Estado, a: Accion): Estado {
     case "estudiantes":
       return { ...s, estudiantes: a.valor };
     case "ruta":
-      return { ...s, ruta: a.valor };
+      return { ...s, ruta: a.valor, escena: s.ruta === a.valor ? s.escena : 0 };
     case "alternar":
       return {
         ...s,
@@ -111,6 +127,14 @@ function reducir(s: Estado, a: Accion): Estado {
       return { ...s, logo: a.valor };
     case "jugo":
       return { ...s, jugo: true };
+    case "escena":
+      return { ...s, escena: a.valor };
+    case "tarea":
+      return { ...s, tarea: { ...s.tarea, ...a.valor } };
+    case "acepto":
+      return { ...s, acepto: true };
+    case "estudiantesConfirmado":
+      return { ...s, estudiantesConfirmado: true };
   }
 }
 

@@ -191,8 +191,8 @@ export function Contenido() {
       <Botones atras={() => setPaso(4)} siguiente={() => {
         if (!estado.prendidas.includes("logbooks")) despachar({ tipo: "alternar", id: "logbooks" });
         medir("contenido_fin");
-        despachar({ tipo: "ir", paso: "numero" });
-      }} textoSiguiente="Los Logbooks vienen con la plataforma: ver mi número" />
+        despachar({ tipo: "ir", paso: "plan" });
+      }} textoSiguiente="Los Logbooks vienen con la plataforma: siguiente" />
     </Paso>,
   ];
 

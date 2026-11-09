@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { leerEnlace, type Enlace } from "@/lib/api";
-import { ProveedorEstado, useConfigurador, type Paso } from "@/lib/estado";
-import { decidirMedicion, decisionMedicion, iniciarMedicion, medir } from "@/lib/analitica";
-import { Medidor } from "@/components/Medidor";
-import { Entrada } from "@/pages/Entrada";
-import { Camino } from "@/pages/Camino";
+import { ProveedorEstado, useConfigurador } from "@/lib/estado";
+import { iniciarMedicion, medir } from "@/lib/analitica";
+// iniciarMedicion: solo cuando el rector acepta en esta visita (ver Pasos).
+import { Bienvenida } from "@/pages/Bienvenida";
+import { Recorrido } from "@/pages/recorrido/Recorrido";
+import { Plan } from "@/pages/Plan";
 import { SuNumero } from "@/pages/SuNumero";
 import { Cierre } from "@/pages/Cierre";
 
@@ -40,7 +41,6 @@ export default function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    iniciarMedicion();
     const e = tokenDeLaUrl();
     if (!e) {
       setError("Este configurador se abre con el enlace que le envió su asesora.");
@@ -56,24 +56,43 @@ export default function App() {
 
   return (
     <ProveedorEstado enlace={enlace}>
-      <Recorrido />
+      <Pasos />
     </ProveedorEstado>
   );
 }
 
-function Recorrido() {
-  const { estado } = useConfigurador();
+function Pasos() {
+  const { enlace, estado, despachar } = useConfigurador();
+  // Google Analytics solo si aceptó los términos en esta demo (no por una visita anterior).
+  useEffect(() => {
+    if (estado.acepto) iniciarMedicion();
+  }, [estado.acepto]);
+  // El logo que subió la asesora: como data URL, para la portada y las vistas
+  // previas (que solo aceptan data:image/).
+  useEffect(() => {
+    if (!enlace.tiene_logo || estado.logo) return;
+    fetch(`/api/config/imagen?e=${encodeURIComponent(enlace.e)}&tipo=logo`)
+      .then((r) => (r.ok && (r.headers.get("content-type") || "").startsWith("image/") ? r.blob() : null))
+      .then((blob) => {
+        if (!blob) return;
+        const lector = new FileReader();
+        lector.onload = () => despachar({ tipo: "logo", valor: String(lector.result) });
+        lector.readAsDataURL(blob);
+      })
+      .catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enlace.e, enlace.tiene_logo]);
   useEffect(() => medir(`ver_${estado.paso}`), [estado.paso]);
-  const conMedidor: Paso[] = ["camino", "numero"];
+  // Sin camino elegido (enlace libre), se vuelve a la bienvenida.
+  const paso = estado.paso === "camino" && !estado.ruta ? "entrada" : estado.paso;
   return (
-    <Pantalla abajo={conMedidor.includes(estado.paso)}>
-      {estado.paso === "entrada" && <Entrada />}
-      {estado.paso === "camino" && <Camino />}
-      {estado.paso === "numero" && <SuNumero />}
-      {estado.paso === "cierre" && <Cierre />}
-      {conMedidor.includes(estado.paso) && <Medidor />}
-      <AvisoMedicion />
-    </Pantalla>
+    <>
+      {paso === "entrada" && <Bienvenida />}
+      {paso === "camino" && <Recorrido />}
+      {paso === "plan" && <Plan />}
+      {paso === "numero" && <Pantalla><SuNumero /></Pantalla>}
+      {paso === "cierre" && <Pantalla><Cierre /></Pantalla>}
+    </>
   );
 }
 
@@ -101,25 +120,5 @@ function SinEnlace({ mensaje }: { mensaje: string }) {
         </a>
       </div>
     </Pantalla>
-  );
-}
-
-function AvisoMedicion() {
-  const [visible, setVisible] = useState(decisionMedicion() === null);
-  if (!visible) return null;
-  const decidir = (si: boolean) => {
-    decidirMedicion(si);
-    setVisible(false);
-  };
-  return (
-    <div className="fixed inset-x-0 top-0 z-30 bg-gray-900 text-sm text-white">
-      <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 px-4 py-2">
-        <span>¿Nos deja medir qué pasos se usan? Solo el recorrido, nunca sus datos.</span>
-        <span className="flex gap-2">
-          <button onClick={() => decidir(false)} className="rounded px-3 py-1 hover:bg-white/10">No</button>
-          <button onClick={() => decidir(true)} className="rounded bg-white px-3 py-1 font-semibold text-gray-900">Sí</button>
-        </span>
-      </div>
-    </div>
   );
 }

@@ -13,6 +13,7 @@
     "local": "node scripts/local.mjs"
   },
   "dependencies": {
+    "@fontsource/nunito": "^5.1.0",
     "jspdf": "^4.2.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"

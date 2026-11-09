@@ -3,6 +3,7 @@ import { FUNCIONALIDADES } from "@/config/funcionalidades";
 import { useConfigurador } from "@/lib/estado";
 import { enviarLead } from "@/lib/api";
 import { medir } from "@/lib/analitica";
+import { avanzar, useAvance } from "@/lib/progreso";
 import { pesos } from "@/lib/precio";
 
 const campo = "w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-purple-600 focus:outline-none";
@@ -13,6 +14,7 @@ export function SuNumero() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
   const k = estado.contacto;
+  useAvance("numero", 60);
 
   const datos = () => ({
     e: enlace.e,
@@ -37,6 +39,7 @@ export function SuNumero() {
     try {
       await enviarLead(datos());
       despachar({ tipo: "leadEnviado" });
+      avanzar(enlace.e, "datos", 70);
       medir("numero");
     } catch (e) {
       setError(e instanceof Error ? e.message : "No pudimos guardar sus datos.");
@@ -114,7 +117,7 @@ export function SuNumero() {
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row">
-        <button onClick={() => despachar({ tipo: "ir", paso: "camino" })}
+        <button onClick={() => despachar({ tipo: "ir", paso: "plan" })}
           className="rounded-xl border border-purple-300 px-5 py-3 font-semibold text-purple-800 hover:bg-purple-50">
           Cambiar lo que elegí
         </button>

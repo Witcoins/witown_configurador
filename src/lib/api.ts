@@ -12,6 +12,9 @@ export interface Enlace {
   ruta: Ruta;
   asesora: { nombre: string; whatsapp: string };
   generaciones_restantes: number;
+  /** La asesora subió foto y logo del colegio (se piden por /api/config/imagen). */
+  tiene_foto?: boolean;
+  tiene_logo?: boolean;
 }
 
 async function pedir<T>(url: string, init?: RequestInit): Promise<T> {
@@ -52,8 +55,8 @@ export const crearReferido = (e: string, correo: string) =>
 
 // ---------- El juego (camino Mejorar resultados) ----------
 
+/** Un tema del catálogo de la demo (temas reales de Cuarto con preguntas en el banco). */
 export interface Subtema {
-  id: string;
   asignatura: string;
   tema: string;
   subtema: string;
@@ -75,7 +78,7 @@ export interface Partida {
   preguntas: PreguntaJuego[];
 }
 
-export const leerSubtemas = () => pedir<{ subtemas: Subtema[]; minutos: number[] }>("/api/config/jugar");
+export const leerSubtemas = () => pedir<{ temas: Subtema[]; minutos: number[] }>("/api/config/jugar");
 
 export const empezarPartida = (e: string, subtema: string, minutos: number) =>
   pedir<Partida>("/api/config/jugar", { method: "POST", body: JSON.stringify({ e, accion: "empezar", subtema, minutos }) });
