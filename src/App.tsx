@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { leerEnlace, type Enlace } from "@/lib/api";
 import { ProveedorEstado, useConfigurador } from "@/lib/estado";
-import { iniciarMedicion, medir } from "@/lib/analitica";
+import { iniciarMedicion, medir, medirRuta } from "@/lib/analitica";
+import { rutaDe, ubicacionDeEstado, useRutas } from "@/lib/rutas";
 // iniciarMedicion: solo cuando el rector acepta en esta visita (ver Pasos).
 import { Bienvenida } from "@/pages/Bienvenida";
 import { Recorrido } from "@/pages/recorrido/Recorrido";
@@ -63,10 +64,15 @@ export default function App() {
 
 function Pasos() {
   const { enlace, estado, despachar } = useConfigurador();
+  // Cada paso con su ruta (/mejorar-resultados/docente…); Atrás del navegador incluido.
+  useRutas(estado, (u) => despachar({ tipo: "ubicar", valor: u }));
   // Google Analytics solo si aceptó los términos en esta demo (no por una visita anterior).
   useEffect(() => {
     if (estado.acepto) iniciarMedicion();
   }, [estado.acepto]);
+  // Una vista por ruta, después de cargar GA y de que la barra cambió (efectos en orden).
+  const rutaActual = rutaDe(ubicacionDeEstado(estado));
+  useEffect(() => medirRuta(), [rutaActual, estado.acepto]);
   // El logo que subió la asesora: como data URL, para la portada y las vistas
   // previas (que solo aceptan data:image/).
   useEffect(() => {

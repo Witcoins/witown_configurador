@@ -88,7 +88,7 @@ export function Plan() {
           <div className="flex gap-2">
             <button onClick={() => despachar({ tipo: "ir", paso: "camino" })} className="rounded-full px-4 py-2 font-semibold text-[#554884] hover:bg-[#554884]/10">Atrás</button>
             <button onClick={() => { medir("plan"); despachar({ tipo: "ir", paso: "numero" }); }}
-              className="rounded-full bg-[hsl(274_85%_37%)] px-5 py-2 font-bold text-white">Ver mi número →</button>
+              className="rounded-full bg-[hsl(274_85%_37%)] px-5 py-2 font-bold text-white">Ver mi inversión →</button>
           </div>
         </div>
       </div>

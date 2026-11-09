@@ -8,6 +8,7 @@
  * Mientras `video` sea null, la portada usa la foto del colegio o el fondo de marca.
  */
 export const PORTADA = {
-  video: null as string | null,
-  poster: null as string | null,
+  // Sin pista de audio (se le quitó al archivo, no solo se silencia).
+  video: "/video/portada.mp4" as string | null,
+  poster: "/video/portada.jpg" as string | null,
 };

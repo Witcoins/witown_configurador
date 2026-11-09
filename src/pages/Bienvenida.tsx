@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useConfigurador } from "@/lib/estado";
 import { decidirMedicion, medir } from "@/lib/analitica";
 import { useAvance } from "@/lib/progreso";
@@ -26,14 +26,14 @@ const URL_TERMINOS = "https://politicas.iwitown.com";
 export function Bienvenida() {
   const { enlace, estado, despachar } = useConfigurador();
   const rutaFija = enlace.ruta !== "libre";
-  const [enPortada, setEnPortada] = useState(true);
+  const enPortada = estado.enPortada;
   const saludo = `Bienvenido(a)${enlace.colegio ? `, ${enlace.colegio}` : ""}`;
   useAvance(enPortada ? "portada" : "bienvenida", enPortada ? 0 : 1);
 
   // Mientras está aquí, se adelanta la carga de las plataformas.
   useEffect(() => precalentar(enlace.e), [enlace.e]);
 
-  if (enPortada) return <Portada empezar={() => setEnPortada(false)} />;
+  if (enPortada) return <Portada empezar={() => despachar({ tipo: "portada", valor: false })} />;
 
   const aceptar = () => {
     despachar({ tipo: "acepto" });

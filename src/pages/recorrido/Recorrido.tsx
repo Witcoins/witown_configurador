@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ESCENAS } from "@/config/escenas";
 import { useConfigurador } from "@/lib/estado";
 import { medir } from "@/lib/analitica";
@@ -16,6 +16,12 @@ const ALTO_BARRA = 56;
  * una barra delgada arriba (quién es usted ahora, avance, Atrás / Siguiente) y
  * el tutorial por pasos dentro de la app. Sin precio: va al final.
  */
+/** Si el rector no asignó tarea, se juega un tema del catálogo de la demo (la pantalla dice cuál). */
+const POR_DEFECTO = { asignatura: "Matemáticas", tema: "Operaciones con fracciones", subtema: "Suma y resta de fracciones con igual denominador" };
+function tareaOPorDefecto<T extends { asignatura: string; tema: string; subtema: string; minutos: number }>(t: T): T {
+  return t.asignatura && t.subtema ? t : { ...t, ...POR_DEFECTO };
+}
+
 export function Recorrido() {
   const { enlace, estado, despachar } = useConfigurador();
   const escenas = estado.ruta && estado.ruta !== "libre" ? ESCENAS[estado.ruta] : [];
@@ -27,6 +33,13 @@ export function Recorrido() {
   const escenaRef = useRef(i);
   escenaRef.current = i;
   useAvance(escena ? `escena-${estado.ruta}-${escena.id}` : null, 10 + i);
+  // Con cualquier cambio de escena (botones o Atrás/Adelante del navegador).
+  useEffect(() => {
+    if (!escena) return;
+    medir("escena", { ruta: estado.ruta || "", escena: escena.id });
+    setJugado(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [estado.ruta, i]);
 
   if (!escena) return null;
   const ultima = i === escenas.length - 1;
@@ -37,8 +50,6 @@ export function Recorrido() {
       medir("camino_fin", { ruta: estado.ruta || "" });
       return despachar({ tipo: "ir", paso: "plan" });
     }
-    medir("escena", { ruta: estado.ruta || "", escena: escenas[n].id });
-    setJugado(false);
     despachar({ tipo: "escena", valor: n });
   };
 
@@ -90,8 +101,8 @@ export function Recorrido() {
         libre={enlace.ruta === "libre"} />
       <div className="absolute inset-x-0 bottom-0" style={{ top: ALTO_BARRA }}>
         <VistaPrevia key={`${estado.ruta}-${escena.id}`} plataforma={escena.plataforma!} ir={escena.ir ?? null}
-          tutorial={escena.tutorial} tutorialId={`${escena.id}-${vuelta}`}
-          jugar={escena.jugar && !estado.jugo ? estado.tarea : null} onEvento={alEvento} />
+          tutorial={escena.tutorial} tutorialId={`${escena.id}-${vuelta}`} mostrar={escena.mostrar}
+          jugar={escena.jugar ? tareaOPorDefecto(estado.tarea) : null} onEvento={alEvento} />
         {escena.panel === "elegirTarea" && <ElegirTarea siguiente={() => ir(i + 1)} />}
         {escena.panel === "alejandro" && <Alejandro />}
         {escena.panel === "feria" && <Feria />}

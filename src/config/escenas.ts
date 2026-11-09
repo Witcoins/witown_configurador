@@ -41,13 +41,17 @@ export interface Escena {
   pantalla?: Pantalla;
   /** La app del estudiante juega la tarea (motor real, una partida por enlace). */
   jugar?: boolean;
+  /** Su ruta, por rol (`/<camino>/<url>`). Si no se da, la del `id`. */
+  url?: string;
+  /** Módulos que la escena muestra aunque el plan elegido no los traiga (solo en la vista previa). */
+  mostrar?: string[];
 }
 
 const centro = (titulo: string, texto: string): PasoTutorial => ({ objetivo: null, titulo, texto, posicion: "center" });
 
 export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
   ahorro: [
-    { id: "hoy", rol: "Su colegio hoy", pantalla: "queTieneHoy" },
+    { id: "hoy", url: "su-colegio-hoy", rol: "Su colegio hoy", pantalla: "queTieneHoy" },
     {
       id: "rector", rol: "Ahora usted es el rector", plataforma: "admin", ir: "/home",
       tutorial: [
@@ -65,7 +69,7 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
       ],
     },
     {
-      id: "papa", rol: "Ahora usted es un papá", plataforma: "padres", ir: "/dashboard",
+      id: "papa", rol: "Ahora usted es un papá", plataforma: "padres", ir: "/dashboard", mostrar: ["cobro", "cafeteria"],
       tutorial: [
         { objetivo: { selector: 'aside button[title="Agenda"]' }, titulo: "Todo del colegio, en un lugar", texto: "Mensajes, tareas y calendario de su hijo." },
         { objetivo: { selector: 'aside button[title="Pagos"]' }, titulo: "Paga en línea", texto: "La pensión mes a mes, sin filas." },
@@ -83,7 +87,7 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
   ],
 
   resultados: [
-    { id: "acp", rol: "Mejorar resultados", pantalla: "acp" },
+    { id: "acp", url: "apertura", rol: "Mejorar resultados", pantalla: "acp" },
     {
       id: "docente", rol: "Ahora usted es el docente", plataforma: "docentes", ir: "/task-manager/assignment", panel: "elegirTarea",
       tutorial: [
@@ -108,27 +112,27 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
       ],
     },
     {
-      id: "alejandro", rol: "Ahora usted es otra vez el docente", plataforma: "docentes", ir: "/students/reporte-estudiante", panel: "alejandro",
+      id: "alejandro", url: "docente-reportes", rol: "Ahora usted es otra vez el docente", plataforma: "docentes", ir: "/students/reporte-estudiante", panel: "alejandro",
       tutorial: [
         { objetivo: { selector: "table tbody tr" }, titulo: "Cada estudiante, su reporte", texto: "Alejandro no terminó. Ábralo y mire en qué se trabó." },
       ],
     },
     {
-      id: "colegio", rol: "Ahora usted es el rector", plataforma: "admin", ir: "/estudiantes/reportes",
+      id: "colegio", url: "rector", rol: "Ahora usted es el rector", plataforma: "admin", ir: "/estudiantes/reportes",
       tutorial: [
         { objetivo: { texto: "Reportes WiwiQuest" }, titulo: "Cada curso, en cada materia", texto: "Puede preguntarle al profesor qué hace para mejorar ese porcentaje." },
         { objetivo: { selector: 'select[aria-label="Periodo del reporte"]' }, titulo: "El periodo que quiera", texto: "Los últimos 30 días, el año o todo." },
       ],
     },
-    { id: "acp-cierre", rol: "Mejorar resultados", pantalla: "acpCierre" },
+    { id: "acp-cierre", url: "cierre", rol: "Mejorar resultados", pantalla: "acpCierre" },
   ],
 
-  contenido: [{ id: "taller", rol: "Sus propios Logbooks", pantalla: "contenido" }],
+  contenido: [{ id: "taller", url: "logbooks", rol: "Sus propios Logbooks", pantalla: "contenido" }],
 
   uso: [
     { id: "quien", rol: "Que de verdad lo usen", pantalla: "quienUsa" },
     {
-      id: "estudiante", rol: "Ahora usted es el estudiante", plataforma: "estudiante", ir: "/home",
+      id: "estudiante", rol: "Ahora usted es el estudiante", plataforma: "estudiante", ir: "/home", mostrar: ["refuerzo"],
       tutorial: [
         centro("Entra porque quiere", "Gana Witkis, sube en el ranking y los gasta en premios."),
         { objetivo: { selector: "main button:has(img[alt='WiwiQuest'])" }, titulo: "Aprende jugando", texto: "Retos cortos que refuerzan lo que le cuesta." },
@@ -137,7 +141,7 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
       ],
     },
     {
-      id: "papa", rol: "Ahora usted es un papá", plataforma: "padres", ir: "/dashboard",
+      id: "papa", rol: "Ahora usted es un papá", plataforma: "padres", ir: "/dashboard", mostrar: ["refuerzo"],
       tutorial: [
         { objetivo: { texto: "estudiantes vinculados" }, titulo: "Un solo lugar", texto: "Sus hijos, sus docentes y los mensajes del colegio." },
         { objetivo: { selector: 'aside button[title="Informes"]' }, titulo: "Sabe cómo va", texto: "El progreso de su hijo, cuando quiera." },

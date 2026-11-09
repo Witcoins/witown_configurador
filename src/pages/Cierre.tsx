@@ -57,7 +57,7 @@ export function Cierre() {
     setError("");
     try {
       const r = await crearReferido(enlace.e, estado.contacto.correo);
-      setReferido(`${location.origin}${location.pathname}?e=${r.e}`);
+      setReferido(`${location.origin}/?e=${r.e}`);
       medir("referido");
       avanzar(enlace.e, "referido", 87);
     } catch (e) {

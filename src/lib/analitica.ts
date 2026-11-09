@@ -58,7 +58,16 @@ export function iniciarMedicion() {
   cargar();
 }
 
+/** La ruta actual, sin query ni hash (nunca el token). */
+const ubicacion = () => location.origin + location.pathname;
+
 export function medir(paso: string, extra: Record<string, string | number> = {}) {
   if (!cargado || !window.gtag) return;
-  window.gtag("event", "configurador_paso", { paso, ...extra });
+  window.gtag("event", "configurador_paso", { paso, ...extra, page_location: ubicacion() });
+}
+
+/** Una vista por cada ruta de la demo (/mejorar-resultados/docente…). */
+export function medirRuta() {
+  if (!cargado || !window.gtag) return;
+  window.gtag("event", "page_view", { page_location: ubicacion(), page_path: location.pathname, page_title: document.title });
 }

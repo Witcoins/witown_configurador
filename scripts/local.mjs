@@ -49,8 +49,17 @@ async function reenviar(req, res, url) {
 
 function archivo(res, ruta) {
   const tipo = TIPOS[extname(ruta).toLowerCase()] || "application/octet-stream";
+  let cuerpo;
+  try {
+    cuerpo = readFileSync(ruta);
+  } catch {
+    // Mientras se rearma dist/ faltan archivos: 503 en vez de tumbar el servidor.
+    res.writeHead(503, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Se está rearmando la demo. Recargue en un momento.");
+    return;
+  }
   res.writeHead(200, { "Content-Type": tipo, "Cache-Control": "no-cache", "Referrer-Policy": "no-referrer" });
-  res.end(readFileSync(ruta));
+  res.end(cuerpo);
 }
 
 createServer(async (req, res) => {

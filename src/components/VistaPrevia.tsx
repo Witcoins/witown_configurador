@@ -29,12 +29,15 @@ export function VistaPrevia({
   tutorial,
   tutorialId,
   jugar,
+  mostrar = [],
   alto = "100%",
   onEvento,
 }: {
   plataforma: Plataforma;
   ir?: string | null;
   tutorial?: PasoTutorial[];
+  /** Módulos que esta escena muestra aunque el plan no los traiga. */
+  mostrar?: string[];
   /** Cambia cuando hay que volver a mostrar el tutorial (otra escena o "ver de nuevo"). */
   tutorialId?: string;
   /** Para la app del estudiante: el juego que tiene que arrancar. */
@@ -78,9 +81,13 @@ export function VistaPrevia({
 
   useEffect(() => {
     if (!lista) return;
-    enviar({ tipo: "vitrina", funcionalidades: estado.prendidas, logo: estado.logo, colegio: estado.contacto.colegio || null, ir });
+    // En "Mejorar resultados" se muestra WiwiQuest aunque el plan aún no lo traiga:
+    // es lo que se está mostrando (solo la vista previa; el precio no cambia).
+    const extra = [...mostrar, ...(estado.ruta === "resultados" ? ["refuerzo"] : [])];
+    const visibles = Array.from(new Set([...estado.prendidas, ...extra]));
+    enviar({ tipo: "vitrina", funcionalidades: visibles, logo: estado.logo, colegio: estado.contacto.colegio || null, ir });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lista, estado.prendidas, estado.logo, estado.contacto.colegio, ir]);
+  }, [lista, estado.prendidas, estado.ruta, estado.logo, estado.contacto.colegio, ir, mostrar.join(",")]);
 
   // El tutorial, un momento después de navegar (la pantalla tiene que estar pintada).
   useEffect(() => {
@@ -95,6 +102,9 @@ export function VistaPrevia({
   const [cubierta, setCubierta] = useState(true);
   useEffect(() => {
     setCubierta(true);
+    // Si la app nunca avisa (falló al arrancar), la cortina no se queda para siempre.
+    const t = window.setTimeout(() => setCubierta(false), 60000);
+    return () => window.clearTimeout(t);
   }, [plataforma]);
   useEffect(() => {
     if (!lista) return;

@@ -52,7 +52,7 @@ export function SuNumero() {
     return (
       <section className="space-y-6">
         <header className="space-y-1">
-          <h1 className="text-2xl font-bold text-purple-900">Su número está listo</h1>
+          <h1 className="text-2xl font-bold text-purple-900">Su inversión está lista</h1>
           <p className="text-gray-600">Déjenos sus datos y se lo mostramos completo.</p>
         </header>
         <form onSubmit={enviar} className="space-y-3 rounded-2xl bg-white p-5 shadow-sm">
@@ -76,7 +76,7 @@ export function SuNumero() {
           {error && <p className="text-sm text-red-700">{error}</p>}
           <button disabled={enviando}
             className="w-full rounded-xl bg-purple-700 px-5 py-3 font-semibold text-white hover:bg-purple-800 disabled:opacity-60">
-            {enviando ? "Guardando…" : "Ver mi número"}
+            {enviando ? "Guardando…" : "Ver mi inversión"}
           </button>
         </form>
       </section>
@@ -88,7 +88,7 @@ export function SuNumero() {
     <section className="space-y-6">
       <header className="space-y-1">
         <p className="text-sm font-medium text-purple-700">{k.colegio}</p>
-        <h1 className="text-2xl font-bold text-purple-900">Su número</h1>
+        <h1 className="text-2xl font-bold text-purple-900">Su inversión en i'Witown</h1>
       </header>
 
       <div className="grid gap-3 sm:grid-cols-2">
