@@ -119,6 +119,8 @@ export function VistaPrevia({
         key={plataforma}
         title={NOMBRES_PLATAFORMA[plataforma]}
         src={`/${plataforma}/`}
+        // La app del estudiante pone las preguntas en pantalla completa.
+        allow="fullscreen"
         className="block h-full w-full border-0 bg-white"
       />
       {cubierta && <Cortina plataforma={plataforma} colegio={estado.contacto.colegio} />}

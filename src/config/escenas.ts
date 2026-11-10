@@ -105,10 +105,13 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
       tutorial: [centro("Le llegó la tarea", "Son las preguntas reales que ve el niño. Respóndalas.")],
     },
     {
-      id: "papa", rol: "Ahora usted es el papá", plataforma: "padres", ir: "/informes/progreso",
+      id: "papa", rol: "Ahora usted es el papá", plataforma: "padres", ir: "/agenda/tareas",
       tutorial: [
-        { objetivo: { texto: "progreso i'witown" }, titulo: "Su hijo ya hizo la tarea", texto: "Aquí ve cuánto sacó y qué respondió." },
-        { objetivo: { texto: "evolucion en el tiempo" }, titulo: "Cómo va", texto: "Día a día, sin esperar al boletín." },
+        centro("Ahora, el papá", "Su hijo acaba de hacer la tarea. Mire cómo se entera el papá."),
+        { objetivo: { texto: "Entregada" }, titulo: "Su hijo ya hizo la tarea", texto: "En Tareas el papá ve la que usted asignó, ya entregada." },
+        { objetivo: { texto: "progreso i'witown" }, ir: "/informes/progreso", titulo: "También tiene el informe", texto: "En Informes ve cómo va su hijo, sin esperar al boletín." },
+        { objetivo: { selector: "table tbody tr.cursor-pointer" }, accion: "clic", titulo: "Lo que respondió hoy", texto: "Haga clic en la fila de hoy para profundizar." },
+        { objetivo: { selector: 'td[colspan="6"]' }, posicion: "top", titulo: "Pregunta por pregunta", texto: "Qué respondió su hijo y cuál era la correcta, pregunta por pregunta." },
       ],
     },
     {
@@ -120,8 +123,11 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
     {
       id: "colegio", url: "rector", rol: "Ahora usted es el rector", plataforma: "admin", ir: "/estudiantes/reportes",
       tutorial: [
-        { objetivo: { texto: "Reportes WiwiQuest" }, titulo: "Cada curso, en cada materia", texto: "Puede preguntarle al profesor qué hace para mejorar ese porcentaje." },
-        { objetivo: { selector: 'select[aria-label="Periodo del reporte"]' }, titulo: "El periodo que quiera", texto: "Los últimos 30 días, el año o todo." },
+        centro("Todo, en tiempo real", "Usted tiene la información de todos sus estudiantes, al día."),
+        { objetivo: { texto: "Por grado / curso" }, accion: "clic", titulo: "Mire un curso", texto: "Haga clic en «Por grado / curso»." },
+        { objetivo: { texto: "Ranking de asignaturas flojas" }, titulo: "Cada asignatura", texto: "En cuáles falla más el curso: ahí conviene hablar con el docente." },
+        { objetivo: { selector: "div.space-y-5 > select" }, titulo: "Cada curso", texto: "Elija el curso que quiera revisar, o véalos todos juntos." },
+        { objetivo: { selector: "div.space-y-5 > div.grid" }, titulo: "Lo más relevante", texto: "Cuántos lo usan, cuánto aciertan y qué alumnos están en riesgo." },
       ],
     },
     { id: "acp-cierre", url: "cierre", rol: "Mejorar resultados", pantalla: "acpCierre" },

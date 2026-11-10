@@ -57,15 +57,34 @@ export function QueTieneHoy({ siguiente }: { siguiente: () => void }) {
 /** Camino Mejorar resultados — la apertura. */
 export function Acp({ siguiente }: { siguiente: () => void }) {
   return (
-    <PantallaWiwiQuest>
-      <div className="animate-aparecer space-y-5 text-center">
-        <Insignia texto="Mejorar resultados" />
-        <TarjetaPregunta>
-          Sus estudiantes no fallan porque no les enseñen; fallan porque olvidan lo que nadie les refuerza.
-          <span className="mt-2 block text-[#443773]">i'Witown lo refuerza.</span>
-        </TarjetaPregunta>
-        <p className="text-gray-600">En los próximos minutos usted será todos: el docente, el estudiante, el papá y el colegio.</p>
-        <div className="flex justify-center"><BotonSiguiente onClick={siguiente}>Empezar →</BotonSiguiente></div>
+    <PantallaWiwiQuest ancha>
+      <div className="animate-aparecer grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+        {/* Izquierda: el video y qué es la A.C.P. */}
+        <div className="space-y-4">
+          {/* Sin pista de audio (se le quitó al archivo). */}
+          <video src="/video/acp.mp4" poster="/video/acp.jpg" autoPlay muted loop playsInline
+            aria-label="La A.C.P. en acción" className="w-full rounded-2xl border-2 border-[#E6E6E6] shadow-sm" />
+          <p className="text-base text-gray-700 lg:text-lg">
+            <strong className="text-[#443773]">La A.C.P.</strong> es el motor que detecta cuándo un estudiante se está
+            quedando atrás y por qué, y lo lleva hasta entender. Y le da toda esa información a su docente, a su papá
+            y a usted.
+          </p>
+        </div>
+        {/* Derecha: la frase del refuerzo. */}
+        <div className="space-y-5 text-center lg:text-left">
+          <Insignia texto="Mejorar resultados" />
+          <h1 className="text-3xl font-extrabold leading-tight text-[#333] lg:text-5xl">
+            Sus estudiantes no fallan porque no les enseñen.
+          </h1>
+          <p className="text-2xl font-extrabold leading-tight text-[#443773] lg:text-3xl">
+            Fallan porque olvidan lo que nadie les refuerza.
+          </p>
+          <p className="text-lg text-gray-700 lg:text-xl">
+            i'Witown lo refuerza: a cada estudiante, justo en lo que le falta, antes de que se note en las pruebas.
+          </p>
+          <p className="text-gray-600">En los próximos minutos usted será todos: el docente, el estudiante, el papá y el colegio.</p>
+          <div className="flex justify-center lg:justify-start"><BotonSiguiente onClick={siguiente}>Empezar →</BotonSiguiente></div>
+        </div>
       </div>
     </PantallaWiwiQuest>
   );

@@ -7,11 +7,11 @@ import FondoWiwiQuest from "@/components/FondoWiwiQuest";
  * fondo animado, tarjeta con latido, opciones con la letra en círculo y el
  * botón "Siguiente pregunta".
  */
-export function PantallaWiwiQuest({ children }: { children: ReactNode }) {
+export function PantallaWiwiQuest({ children, ancha = false }: { children: ReactNode; ancha?: boolean }) {
   return (
     <div className="relative z-0 min-h-screen bg-white font-nunito">
       <FondoWiwiQuest variant={1} claro />
-      <div className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-4 py-10">{children}</div>
+      <div className={`mx-auto flex min-h-screen flex-col justify-center px-4 py-10 ${ancha ? "max-w-6xl" : "max-w-2xl"}`}>{children}</div>
     </div>
   );
 }
