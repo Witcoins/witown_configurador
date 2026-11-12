@@ -16,66 +16,78 @@ function Flotante({ titulo, children }: { titulo: string; children: React.ReactN
 const normalizar = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
 /**
- * Mejorar resultados, como docente. Lo normal es asignar la tarea de
- * afianzamiento en el Gestor de tareas real (la vista previa avisa
- * "tarea-asignada"); este recuadro es el atajo: busque entre los temas reales
- * del catálogo de la demo (no se crean temas nuevos: ver configuradorJugar).
+ * Mejorar resultados, como docente: dos pasos y a las preguntas. 1) la
+ * asignatura, 2) el tema y el subtema, entre los temas reales del catálogo de
+ * la demo (no se crean temas nuevos: ver configuradorJugar). Sin formularios:
+ * la duración queda en la de por defecto.
  */
 export function ElegirTarea({ siguiente }: { siguiente: () => void }) {
   const { estado, despachar } = useConfigurador();
-  const [abierto, setAbierto] = useState(false);
   const [temas, setTemas] = useState<Subtema[]>([]);
-  const [minutos, setMinutos] = useState<number[]>([10, 15, 20]);
   const [busqueda, setBusqueda] = useState("");
+  const [sinCatalogo, setSinCatalogo] = useState(false);
   useEffect(() => {
-    leerSubtemas().then((r) => { setTemas(r.temas); setMinutos(r.minutos); }).catch(() => undefined);
+    leerSubtemas().then((r) => setTemas(r.temas)).catch(() => setSinCatalogo(true));
   }, []);
   const t = estado.tarea;
+  const asignaturas = Array.from(new Set(temas.map((x) => x.asignatura)));
+  const asignatura = asignaturas.includes(t.asignatura) ? t.asignatura : "";
   const elegido = temas.find((x) => x.asignatura === t.asignatura && x.subtema === t.subtema);
   const q = normalizar(busqueda.trim());
-  const resultados = (q ? temas.filter((x) => normalizar(`${x.asignatura} ${x.tema} ${x.subtema}`).includes(q)) : temas).slice(0, 8);
+  const deLaAsignatura = temas.filter((x) => x.asignatura === asignatura);
+  const resultados = q ? deLaAsignatura.filter((x) => normalizar(`${x.tema} ${x.subtema}`).includes(q)) : deLaAsignatura;
 
-  if (!abierto) {
-    return (
-      <button onClick={() => setAbierto(true)}
-        className="absolute bottom-4 right-4 z-20 rounded-full bg-white px-4 py-2 font-nunito text-sm font-bold text-[hsl(274_85%_37%)] shadow-xl ring-1 ring-black/5">
-        ¿Prefiere elegir la tarea aquí?
-      </button>
-    );
-  }
   return (
-    <Flotante titulo="Elija el tema de la tarea">
-      <div className="space-y-3">
-        <input className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-[#554884] focus:outline-none"
-          placeholder="Busque: fotosíntesis, fracciones, weather…" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
-          aria-label="Buscar un tema" />
-        <div className="max-h-56 space-y-1 overflow-y-auto">
-          {resultados.map((x) => {
-            const activo = elegido === x;
-            return (
-              <button key={`${x.asignatura}|${x.subtema}`} aria-pressed={activo}
-                onClick={() => despachar({ tipo: "tarea", valor: { asignatura: x.asignatura, tema: x.tema, subtema: x.subtema } })}
-                className={`w-full rounded-xl border-2 px-3 py-1.5 text-left text-sm ${activo ? "border-[#554884] bg-[#554884]/10" : "border-gray-200"}`}>
-                <span className="block text-[11px] text-gray-500">{x.asignatura} · {x.tema}</span>{x.subtema}
+    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 p-4 font-nunito">
+      <div className="w-full max-w-lg animate-aparecer space-y-4 rounded-2xl bg-white p-5 shadow-2xl">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-[#554884]">Paso 1 de 3</p>
+          <p className="text-lg font-extrabold text-[#333]">Elija lo que su estudiante va a estudiar</p>
+          <p className="text-sm text-gray-600">La asignatura y luego el tema.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {asignaturas.map((a) => (
+              <button key={a} aria-pressed={asignatura === a}
+                onClick={() => { setBusqueda(""); despachar({ tipo: "tarea", valor: { asignatura: a, tema: "", subtema: "" } }); }}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold ${asignatura === a ? "bg-[#554884] text-white" : "bg-[#F5E6D3] text-[#333]"}`}>
+                {a}
               </button>
-            );
-          })}
-          {temas.length > 0 && resultados.length === 0 && <p className="text-xs text-gray-500">No hay temas con esa palabra. Pruebe con otra.</p>}
+            ))}
+            {temas.length === 0 && (
+              <p className="text-sm text-gray-500">
+                {sinCatalogo ? "No pudimos cargar los temas. Toque «Siguiente» arriba y verá preguntas de un tema de ejemplo." : "Cargando las asignaturas…"}
+              </p>
+            )}
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5 text-sm">
-          <span className="text-gray-600">Duración:</span>
-          {minutos.map((m) => (
-            <button key={m} aria-pressed={t.minutos === m} onClick={() => despachar({ tipo: "tarea", valor: { minutos: m } })}
-              className={`rounded-full px-3 py-1 ${t.minutos === m ? "bg-[#554884] text-white" : "bg-[#F5E6D3] text-[#333]"}`}>{m} min</button>
-          ))}
-        </div>
+
+        {asignatura && (
+          <div>
+            {deLaAsignatura.length > 6 && (
+              <input className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-[#554884] focus:outline-none"
+                placeholder="Busque un tema…" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} aria-label="Buscar un tema" />
+            )}
+            <div className="mt-2 max-h-56 space-y-1 overflow-y-auto">
+              {resultados.map((x) => {
+                const activo = elegido === x;
+                return (
+                  <button key={`${x.asignatura}|${x.subtema}`} aria-pressed={activo}
+                    onClick={() => despachar({ tipo: "tarea", valor: { asignatura: x.asignatura, tema: x.tema, subtema: x.subtema } })}
+                    className={`w-full rounded-xl border-2 px-3 py-1.5 text-left text-sm ${activo ? "border-[#554884] bg-[#554884]/10" : "border-gray-200"}`}>
+                    <span className="block text-[11px] text-gray-500">{x.tema}</span>{x.subtema}
+                  </button>
+                );
+              })}
+              {resultados.length === 0 && <p className="text-xs text-gray-500">No hay temas con esa palabra. Pruebe con otra.</p>}
+            </div>
+          </div>
+        )}
+
         <button onClick={siguiente} disabled={!elegido}
-          className="w-full rounded-full bg-[hsl(274_85%_37%)] px-4 py-2 font-bold text-white disabled:opacity-50">
-          Enviar al estudiante →
+          className="w-full rounded-full bg-[hsl(274_85%_37%)] px-4 py-2.5 font-bold text-white disabled:opacity-50">
+          Paso 2: ver las preguntas →
         </button>
-        <button onClick={() => setAbierto(false)} className="w-full text-xs text-gray-500 underline">Cerrar</button>
       </div>
-    </Flotante>
+    </div>
   );
 }
 

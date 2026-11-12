@@ -26,7 +26,7 @@ export interface PasoTutorial {
 }
 
 export type Panel = "elegirTarea" | "alejandro" | "feria";
-export type Pantalla = "queTieneHoy" | "acp" | "acpCierre" | "quienUsa" | "contenido";
+export type Pantalla = "queTieneHoy" | "acp" | "acpCierre" | "quienUsa" | "contenido" | "resultadosReales";
 
 export interface Escena {
   id: string;
@@ -48,6 +48,9 @@ export interface Escena {
 }
 
 const centro = (titulo: string, texto: string): PasoTutorial => ({ objetivo: null, titulo, texto, posicion: "center" });
+
+/** El paso final de un camino: resultados en uso real (config/resultadosReales.ts). */
+const reporte = (rol = "Resultados reales"): Escena => ({ id: "reporte", url: "resultados-reales", rol, pantalla: "resultadosReales" });
 
 export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
   ahorro: [
@@ -84,41 +87,18 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
         { objetivo: { selector: 'a[href$="/pedidos"]' }, titulo: "Preventa", texto: "Lo que pidieron desde la app, listo para entregar." },
       ],
     },
+    reporte(),
   ],
 
   resultados: [
     { id: "acp", url: "apertura", rol: "Mejorar resultados", pantalla: "acp" },
     {
       id: "docente", rol: "Ahora usted es el docente", plataforma: "docentes", ir: "/task-manager/assignment", panel: "elegirTarea",
-      tutorial: [
-        centro("1. Su docente inicia un tema en clase y desea que se refuerce en casa", "Asígnele una tarea de afianzamiento. Haga cada paso: la guía lo espera."),
-        { objetivo: { selector: 'button[role="radio"][title="Afianzamiento"]' }, accion: "clic", titulo: "Elija Afianzamiento", texto: "Es la tarea que refuerza el tema con preguntas a la medida de cada estudiante." },
-        { objetivo: { texto: "Fecha y hora límite" }, accion: "formulario", titulo: "¿Hasta cuándo?", texto: "Elija la fecha y la hora de cierre, y confirme." },
-        { objetivo: { texto: "Contenido" }, accion: "formulario", titulo: "¿Qué refuerza?", texto: "Elija la asignatura y busque el tema y el subtema entre las sugerencias." },
-        { objetivo: { texto: "Características" }, accion: "formulario", titulo: "¿Cuánto tiempo?", texto: "Elija Tiempo (10, 15 o 20 minutos) y el puntaje." },
-        { objetivo: { texto: "Instrucciones" }, accion: "formulario", titulo: "Explique el subtema", texto: "Un video, un enlace o un texto suyo: lo que el niño ve antes de las preguntas." },
-        { objetivo: { selector: "button:has(> svg.lucide-send)" }, accion: "clic", titulo: "Envíela", texto: "Le llega a Cuarto A y, en seguida, usted la juega como estudiante." },
-      ],
+      // Sin tutorial: el recuadro pide solo la asignatura y el tema (dos pasos).
     },
     {
       id: "estudiante", rol: "Ahora usted es el estudiante", plataforma: "estudiante", ir: "/wiwiquest/question", jugar: true,
-      tutorial: [centro("Le llegó la tarea", "Son las preguntas reales que ve el niño. Respóndalas.")],
-    },
-    {
-      id: "papa", rol: "Ahora usted es el papá", plataforma: "padres", ir: "/agenda/tareas",
-      tutorial: [
-        centro("Ahora, el papá", "Su hijo acaba de hacer la tarea. Mire cómo se entera el papá."),
-        { objetivo: { texto: "Entregada" }, titulo: "Su hijo ya hizo la tarea", texto: "En Tareas el papá ve la que usted asignó, ya entregada." },
-        { objetivo: { texto: "progreso i'witown" }, ir: "/informes/progreso", titulo: "También tiene el informe", texto: "En Informes ve cómo va su hijo, sin esperar al boletín." },
-        { objetivo: { selector: "table tbody tr.cursor-pointer" }, accion: "clic", titulo: "Lo que respondió hoy", texto: "Haga clic en la fila de hoy para profundizar." },
-        { objetivo: { selector: 'td[colspan="6"]' }, posicion: "top", titulo: "Pregunta por pregunta", texto: "Qué respondió su hijo y cuál era la correcta, pregunta por pregunta." },
-      ],
-    },
-    {
-      id: "alejandro", url: "docente-reportes", rol: "Ahora usted es otra vez el docente", plataforma: "docentes", ir: "/students/reporte-estudiante", panel: "alejandro",
-      tutorial: [
-        { objetivo: { selector: "table tbody tr" }, titulo: "Cada estudiante, su reporte", texto: "Alejandro no terminó. Ábralo y mire en qué se trabó." },
-      ],
+      tutorial: [centro("Paso 2 de 3: las preguntas", "Son las preguntas reales que ve el niño, sobre lo que usted eligió. Respóndalas.")],
     },
     {
       id: "colegio", url: "rector", rol: "Ahora usted es el rector", plataforma: "admin", ir: "/estudiantes/reportes",
@@ -130,6 +110,7 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
         { objetivo: { selector: "div.space-y-5 > div.grid" }, titulo: "Lo más relevante", texto: "Cuántos lo usan, cuánto aciertan y qué alumnos están en riesgo." },
       ],
     },
+    reporte("Paso 3 de 3: resultados reales"),
     { id: "acp-cierre", url: "cierre", rol: "Mejorar resultados", pantalla: "acpCierre" },
   ],
 
@@ -159,5 +140,6 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
         { objetivo: { texto: "Informes de uso" }, titulo: "Usted ve quién la usa", texto: "Curso por curso. Prenda la Feria en el recuadro de abajo a la derecha." },
       ],
     },
+    reporte(),
   ],
 };

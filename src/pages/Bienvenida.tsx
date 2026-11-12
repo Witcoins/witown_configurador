@@ -5,7 +5,7 @@ import { useAvance } from "@/lib/progreso";
 import { precalentar } from "@/lib/precalentar";
 import type { Ruta } from "@/lib/api";
 import { Portada } from "@/pages/Portada";
-import { BotonSiguiente, Insignia, Opcion, PantallaWiwiQuest, TarjetaPregunta } from "@/components/Pregunta";
+import { BotonSiguiente, Insignia, Opcion, PantallaWiwiQuest } from "@/components/Pregunta";
 
 /** Las cuatro razones por las que un colegio cambia de editorial. Sin "otro" ni "todo". */
 export const OPCIONES: { ruta: Exclude<Ruta, "libre">; titulo: string }[] = [
@@ -72,7 +72,9 @@ export function Bienvenida() {
           </div>
         ) : (
           <>
-            <TarjetaPregunta>Al contratar i'Witown, usted busca…</TarjetaPregunta>
+            <h2 className="text-center text-2xl font-extrabold leading-tight text-[#333] lg:text-4xl">
+              Al contratar i'Witown, usted busca…
+            </h2>
             <div className={`grid gap-[9px] transition ${estado.acepto ? "" : "pointer-events-none opacity-50"}`} aria-disabled={!estado.acepto}>
               {OPCIONES.map((o, i) => (
                 <Opcion key={o.ruta} letra={LETRAS[i]} elegida={estado.ruta === o.ruta} onClick={() => ir(o.ruta)}>

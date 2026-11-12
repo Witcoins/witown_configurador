@@ -6,7 +6,7 @@ import { avanzar, useAvance } from "@/lib/progreso";
 import { OPCIONES } from "@/pages/Bienvenida";
 import { Contenido } from "@/pages/caminos/Contenido";
 import { VistaPrevia, NOMBRES_PLATAFORMA, type EventoVitrina } from "@/components/VistaPrevia";
-import { Acp, AcpCierre, QueTieneHoy, QuienUsa } from "./Pantallas";
+import { Acp, AcpCierre, QueTieneHoy, QuienUsa, ResultadosReales } from "./Pantallas";
 import { Alejandro, ElegirTarea, Feria } from "./Paneles";
 
 const ALTO_BARRA = 56;
@@ -84,6 +84,7 @@ export function Recorrido() {
           {escena.pantalla === "acp" && <Acp siguiente={seguir} />}
           {escena.pantalla === "acpCierre" && <AcpCierre siguiente={seguir} />}
           {escena.pantalla === "quienUsa" && <QuienUsa siguiente={seguir} />}
+          {escena.pantalla === "resultadosReales" && <ResultadosReales siguiente={seguir} ultima={ultima} />}
           {escena.pantalla === "contenido" && <div className="mx-auto max-w-3xl px-4 py-8 font-nunito"><Contenido /></div>}
         </div>
       </div>

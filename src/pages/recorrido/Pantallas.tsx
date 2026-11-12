@@ -1,6 +1,7 @@
 import { useConfigurador } from "@/lib/estado";
 import { pesos } from "@/lib/precio";
 import { medir } from "@/lib/analitica";
+import { RESULTADOS_REALES } from "@/config/resultadosReales";
 import { BotonSiguiente, Insignia, Opcion, PantallaWiwiQuest, TarjetaPregunta } from "@/components/Pregunta";
 
 const EDITORIALES = ["SM", "Santillana", "Norma", "Richmond", "Otra"];
@@ -54,7 +55,7 @@ export function QueTieneHoy({ siguiente }: { siguiente: () => void }) {
   );
 }
 
-/** Camino Mejorar resultados — la apertura. */
+/** Camino Mejorar resultados — la apertura: la curva del olvido y la A.C.P. como respuesta. */
 export function Acp({ siguiente }: { siguiente: () => void }) {
   return (
     <PantallaWiwiQuest ancha>
@@ -65,24 +66,22 @@ export function Acp({ siguiente }: { siguiente: () => void }) {
           <video src="/video/acp.mp4" poster="/video/acp.jpg" autoPlay muted loop playsInline
             aria-label="La A.C.P. en acción" className="w-full rounded-2xl border-2 border-[#E6E6E6] shadow-sm" />
           <p className="text-base text-gray-700 lg:text-lg">
-            <strong className="text-[#443773]">La A.C.P.</strong> es el motor que detecta cuándo un estudiante se está
-            quedando atrás y por qué, y lo lleva hasta entender. Y le da toda esa información a su docente, a su papá
-            y a usted.
+            <strong className="text-[#443773]">La A.C.P.</strong> es el motor que hace ese repaso por usted: detecta
+            cuándo y en qué se está quedando atrás cada estudiante, y por qué, y lo refuerza justo a tiempo hasta que
+            lo entiende. Toda esa información le llega al docente, al papá y a usted.
           </p>
         </div>
-        {/* Derecha: la frase del refuerzo. */}
+        {/* Derecha: la curva del olvido. */}
         <div className="space-y-5 text-center lg:text-left">
           <Insignia texto="Mejorar resultados" />
           <h1 className="text-3xl font-extrabold leading-tight text-[#333] lg:text-5xl">
-            Sus estudiantes no fallan porque no les enseñen.
+            Sin repaso, lo aprendido se olvida en pocos días.
           </h1>
-          <p className="text-2xl font-extrabold leading-tight text-[#443773] lg:text-3xl">
-            Fallan porque olvidan lo que nadie les refuerza.
-          </p>
           <p className="text-lg text-gray-700 lg:text-xl">
-            i'Witown lo refuerza: a cada estudiante, justo en lo que le falta, antes de que se note en las pruebas.
+            Es la curva del olvido, que demostró Hermann Ebbinghaus. Y lo que la frena es repasar en el momento justo,
+            antes de que se olvide.
           </p>
-          <p className="text-gray-600">En los próximos minutos usted será todos: el docente, el estudiante, el papá y el colegio.</p>
+          <p className="text-gray-600">En los próximos minutos usted será todos: el docente, el estudiante y el rector.</p>
           <div className="flex justify-center lg:justify-start"><BotonSiguiente onClick={siguiente}>Empezar →</BotonSiguiente></div>
         </div>
       </div>
@@ -90,21 +89,56 @@ export function Acp({ siguiente }: { siguiente: () => void }) {
   );
 }
 
-/** Camino Mejorar resultados — el cierre, con la A.C.P. */
+/** Camino Mejorar resultados — el cierre, con el video de la portada. */
 export function AcpCierre({ siguiente }: { siguiente: () => void }) {
   return (
-    <PantallaWiwiQuest>
-      <div className="animate-aparecer space-y-5 text-center">
-        <Insignia texto="Con la A.C.P." />
-        <TarjetaPregunta>
-          Con la A.C.P., ese refuerzo no se queda en repetir para la prueba: lleva a cada estudiante desde entender el
-          concepto hasta crear con él.
-        </TarjetaPregunta>
-        <p className="text-lg text-gray-700">
-          Por eso sabemos que funciona: no solo ganan pruebas, aprenden a resolver los problemas de la vida, que es para
-          lo que existe la educación.
-        </p>
-        <div className="flex justify-center"><BotonSiguiente onClick={siguiente}>Arme su plan →</BotonSiguiente></div>
+    <PantallaWiwiQuest ancha>
+      <div className="animate-aparecer grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+        {/* Sin pista de audio (se le quitó al archivo). */}
+        <video src="/video/portada.mp4" poster="/video/portada.jpg" autoPlay muted loop playsInline
+          aria-hidden className="w-full rounded-2xl border-2 border-[#E6E6E6] shadow-sm" />
+        <div className="space-y-5 text-center lg:text-left">
+          <Insignia texto="Con la A.C.P." />
+          <h2 className="text-3xl font-extrabold leading-tight text-[#333] lg:text-4xl">
+            Sabrá en qué y cuándo se traba cada estudiante, para mejorar sus resultados a tiempo.
+          </h2>
+          <p className="text-lg text-gray-700 lg:text-xl">
+            Un estudiante puede responder bien un examen porque memorizó, no porque interiorizó lo que aprendió. La
+            A.C.P. le muestra la diferencia.
+          </p>
+          <div className="flex justify-center lg:justify-start"><BotonSiguiente onClick={siguiente}>Arme su plan →</BotonSiguiente></div>
+        </div>
+      </div>
+    </PantallaWiwiQuest>
+  );
+}
+
+/** Paso final de cada camino: resultados en uso real (un colegio, sin nombrarlo). */
+export function ResultadosReales({ siguiente, ultima = false }: { siguiente: () => void; ultima?: boolean }) {
+  const { estado } = useConfigurador();
+  const r = estado.ruta && estado.ruta !== "libre" ? RESULTADOS_REALES[estado.ruta] : undefined;
+  if (!r) return null;
+  return (
+    <PantallaWiwiQuest ancha>
+      <div className="animate-aparecer space-y-8 text-center">
+        <div className="space-y-3">
+          <Insignia texto="Resultados que hemos obtenido en su uso real" />
+          <h2 className="text-3xl font-extrabold leading-tight text-[#333] lg:text-5xl">{r.titulo}</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {r.indicadores.map((x) => (
+            <div key={x.dice} className="space-y-2 rounded-2xl border-2 border-[#E6E6E6] bg-white/95 p-6 shadow-sm">
+              <p className="text-4xl font-extrabold text-[#443773] lg:text-5xl">{x.cifra}</p>
+              {x.acento && (
+                <span className="inline-block rounded-full bg-[hsl(274_85%_37%)] px-3 py-1 text-xs font-extrabold tracking-wide text-white">
+                  {x.acento}
+                </span>
+              )}
+              <p className="text-base text-gray-700 lg:text-lg">{x.dice}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-center"><BotonSiguiente onClick={siguiente}>{ultima ? "Arme su plan →" : "Siguiente →"}</BotonSiguiente></div>
       </div>
     </PantallaWiwiQuest>
   );
