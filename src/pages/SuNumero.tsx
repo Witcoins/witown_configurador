@@ -4,7 +4,7 @@ import { useConfigurador } from "@/lib/estado";
 import { enviarLead } from "@/lib/api";
 import { medir } from "@/lib/analitica";
 import { avanzar, useAvance } from "@/lib/progreso";
-import { pesos } from "@/lib/precio";
+import { nombreCotizacion, pesos } from "@/lib/precio";
 
 const campo = "w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-purple-600 focus:outline-none";
 
@@ -95,7 +95,7 @@ export function SuNumero() {
         <div className="rounded-2xl bg-purple-700 p-5 text-white">
           <p className="text-sm opacity-80">Por estudiante al año</p>
           <p className="text-3xl font-bold">{pesos(c.porEstudiante)}</p>
-          <p className="text-sm opacity-80">Plan {c.plan.nombre}{c.conLogbooks ? " con Logbooks" : ""}</p>
+          <p className="text-sm opacity-80">{nombreCotizacion(c)}</p>
         </div>
         <div className="rounded-2xl bg-white p-5 shadow-sm">
           <p className="text-sm text-gray-500">Total al año, {estado.estudiantes} estudiantes</p>

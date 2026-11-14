@@ -26,7 +26,7 @@ export interface PasoTutorial {
 }
 
 export type Panel = "elegirTarea" | "alejandro" | "feria";
-export type Pantalla = "queTieneHoy" | "acp" | "acpCierre" | "quienUsa" | "contenido" | "resultadosReales";
+export type Pantalla = "ahorroCostos" | "queTieneHoy" | "acp" | "acpCierre" | "quienUsa" | "contenido" | "resultadosReales";
 
 export interface Escena {
   id: string;
@@ -53,42 +53,8 @@ const centro = (titulo: string, texto: string): PasoTutorial => ({ objetivo: nul
 const reporte = (rol = "Resultados reales"): Escena => ({ id: "reporte", url: "resultados-reales", rol, pantalla: "resultadosReales" });
 
 export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
-  ahorro: [
-    { id: "hoy", url: "su-colegio-hoy", rol: "Su colegio hoy", pantalla: "queTieneHoy" },
-    {
-      id: "rector", rol: "Ahora usted es el rector", plataforma: "admin", ir: "/home",
-      tutorial: [
-        centro("Este es su colegio en i'Witown", "Lo que hoy está en varias plataformas, aquí está en una sola."),
-        { objetivo: { selector: 'a[href$="/mensajeria"]' }, titulo: "Comunicación", texto: "Mensajes, calendario y anuncios para docentes y familias." },
-        { objetivo: { selector: 'img[alt="Estudiantes"]' }, titulo: "Lo académico", texto: "Tareas y reportes de cada estudiante." },
-        { objetivo: { selector: 'a[href$="/operaciones"]' }, titulo: "Witkis y Feria", texto: "La moneda del colegio, que motiva a usar la plataforma." },
-      ],
-    },
-    {
-      id: "docente", rol: "Ahora usted es un docente", plataforma: "docentes", ir: "/dashboard",
-      tutorial: [
-        { objetivo: { selector: '[data-sidebar="menu-item"] a[href*="/parents-agenda"]' }, titulo: "Habla con las familias", texto: "Mensajes y calendario, sin grupos de WhatsApp." },
-        { objetivo: { selector: '[data-sidebar="menu-item"] a[href$="/task-manager/assignment"]' }, titulo: "Asigna y revisa", texto: "Las tareas le llegan al estudiante y al papá." },
-      ],
-    },
-    {
-      id: "papa", rol: "Ahora usted es un papá", plataforma: "padres", ir: "/dashboard", mostrar: ["cobro", "cafeteria"],
-      tutorial: [
-        { objetivo: { selector: 'aside button[title="Agenda"]' }, titulo: "Todo del colegio, en un lugar", texto: "Mensajes, tareas y calendario de su hijo." },
-        { objetivo: { selector: 'aside button[title="Pagos"]' }, titulo: "Paga en línea", texto: "La pensión mes a mes, sin filas." },
-        { objetivo: { selector: 'aside button[title="Tienda"]' }, titulo: "La cafetería", texto: "Pide y recarga para su hijo desde aquí." },
-      ],
-    },
-    {
-      id: "tendero", rol: "Ahora usted es el tendero", plataforma: "tienda", ir: "/vender",
-      tutorial: [
-        { objetivo: { selector: "#buscarProd" }, titulo: "Vende en segundos", texto: "Busque el producto o páselo por el lector." },
-        { objetivo: { texto: "Cobrar" }, titulo: "Cobra como quiera", texto: "Con el saldo del estudiante, fiado o becado." },
-        { objetivo: { selector: 'a[href$="/pedidos"]' }, titulo: "Preventa", texto: "Lo que pidieron desde la app, listo para entregar." },
-      ],
-    },
-    reporte(),
-  ],
+  // Una sola pantalla, sin visita guiada (decisión de la dueña, 2026-11-14).
+  ahorro: [{ id: "ahorro", url: "logbooks-y-planes", rol: "Ahorrar costos", pantalla: "ahorroCostos" }],
 
   resultados: [
     { id: "acp", url: "apertura", rol: "Mejorar resultados", pantalla: "acp" },
@@ -122,15 +88,17 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
       id: "estudiante", rol: "Ahora usted es el estudiante", plataforma: "estudiante", ir: "/home", mostrar: ["refuerzo"],
       tutorial: [
         centro("Entra porque quiere", "Gana Witkis, sube en el ranking y los gasta en premios."),
-        { objetivo: { selector: "main button:has(img[alt='WiwiQuest'])" }, titulo: "Aprende jugando", texto: "Retos cortos que refuerzan lo que le cuesta." },
+        { objetivo: { selector: "main button:has(img[alt='WiwiQuest'])" }, titulo: "Aprende jugando", texto: "El refuerzo de los temas puede ser diario: retos cortos en lo que le cuesta." },
         { objetivo: { selector: "main button:has(img[alt='WORK'])" }, titulo: "Sus tareas", texto: "Lo que el docente le asignó, con su fecha." },
         { objetivo: { texto: "Cuenta de Witown" }, titulo: "Sus Witkis", texto: "Los gana participando y los gasta en la cafetería y en premios." },
       ],
     },
     {
-      id: "papa", rol: "Ahora usted es un papá", plataforma: "padres", ir: "/dashboard", mostrar: ["refuerzo"],
+      id: "papa", rol: "Ahora usted es un papá", plataforma: "padres", ir: "/dashboard", mostrar: ["refuerzo", "cobro"],
       tutorial: [
         { objetivo: { texto: "estudiantes vinculados" }, titulo: "Un solo lugar", texto: "Sus hijos, sus docentes y los mensajes del colegio." },
+        { objetivo: { selector: 'aside button[title="Agenda"]' }, titulo: "La nueva agenda", texto: "Mensajes del colegio, tareas y calendario en un solo lugar." },
+        { objetivo: { selector: 'aside button[title="Pagos"]' }, titulo: "Recuperación de cartera", texto: "La pensión mes a mes, con pago en línea." },
         { objetivo: { selector: 'aside button[title="Informes"]' }, titulo: "Sabe cómo va", texto: "El progreso de su hijo, cuando quiera." },
       ],
     },

@@ -100,7 +100,7 @@ export function AcpCierre({ siguiente }: { siguiente: () => void }) {
             Un estudiante puede responder bien un examen porque memorizó, no porque interiorizó lo que aprendió. La
             A.C.P. le muestra la diferencia.
           </p>
-          <div className="flex justify-center lg:justify-start"><BotonSiguiente onClick={siguiente}>Arme su plan →</BotonSiguiente></div>
+          <div className="flex justify-center lg:justify-start"><BotonSiguiente onClick={siguiente}>Conozca su precio →</BotonSiguiente></div>
         </div>
       </div>
     </PantallaWiwiQuest>
@@ -132,7 +132,7 @@ export function ResultadosReales({ siguiente, ultima = false }: { siguiente: () 
             </div>
           ))}
         </div>
-        <div className="flex justify-center"><BotonSiguiente onClick={siguiente}>{ultima ? "Arme su plan →" : "Siguiente →"}</BotonSiguiente></div>
+        <div className="flex justify-center"><BotonSiguiente onClick={siguiente}>{ultima ? "Conozca su precio →" : "Siguiente →"}</BotonSiguiente></div>
       </div>
     </PantallaWiwiQuest>
   );
