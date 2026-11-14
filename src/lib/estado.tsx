@@ -153,8 +153,12 @@ function paso(s: Estado, a: Accion): Estado {
       return { ...s, jugo: true };
     case "escena":
       return { ...s, escena: a.valor };
-    case "tarea":
-      return { ...s, tarea: { ...s.tarea, ...a.valor } };
+    case "tarea": {
+      const tarea = { ...s.tarea, ...a.valor };
+      // Otro tema = otra partida: el rector puede jugar lo que acaba de elegir.
+      const otra = tarea.asignatura !== s.tarea.asignatura || tarea.subtema !== s.tarea.subtema;
+      return { ...s, tarea, jugo: otra ? false : s.jugo };
+    }
     case "acepto":
       return { ...s, acepto: true };
     case "estudiantesConfirmado":
@@ -189,7 +193,9 @@ export function ProveedorEstado({ enlace, children }: { enlace: Enlace; children
     try {
       const guardado = sessionStorage.getItem(claveDe(en.e));
       if (guardado) {
-        s = { ...s, ...JSON.parse(guardado), logo: null } as Estado;
+        // `jugo` lo dice el servidor (partidas que quedan hoy), no la visita anterior:
+        // al volver a entrar, el rector puede jugar de nuevo.
+        s = { ...s, ...JSON.parse(guardado), logo: null, jugo: s.jugo } as Estado;
         habiaEstado = true;
       }
     } catch {

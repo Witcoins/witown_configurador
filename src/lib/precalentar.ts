@@ -45,6 +45,27 @@ export function precalentar(e: string) {
       await sesionDe(p, e);
     }
   })();
+  mantenerDespierta(e);
+}
+
+/**
+ * La función de las vistas previas no tiene instancia siempre encendida (no se
+ * paga un costo fijo: decisión 2026-11-14) y se apaga tras unos minutos sin
+ * pedidos, perdiendo su caché. Mientras la demo está abierta, un pedido liviano
+ * cada 4 minutos la mantiene despierta; se detiene a los 90 minutos para que
+ * una pestaña olvidada no la tenga prendida.
+ */
+const CADA_MS = 4 * 60 * 1000;
+const HASTA_MS = 90 * 60 * 1000;
+function mantenerDespierta(e: string) {
+  const fin = Date.now() + HASTA_MS;
+  const reloj = window.setInterval(() => {
+    if (Date.now() > fin) {
+      window.clearInterval(reloj);
+      return;
+    }
+    fetch("/api/demo/admin/_sesion", { headers: { "X-Vitrina-Enlace": e, Authorization: "Bearer demo" } }).catch(() => undefined);
+  }, CADA_MS);
 }
 
 /**
