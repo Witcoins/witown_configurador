@@ -9,7 +9,7 @@ import { Contenido } from "@/pages/caminos/Contenido";
 import { VistaPrevia, NOMBRES_PLATAFORMA, type EventoVitrina } from "@/components/VistaPrevia";
 import { Acp, AcpCierre, QueTieneHoy, QuienUsa, ResultadosReales } from "./Pantallas";
 import { Alejandro, ElegirTarea, Feria, MIN_TEMA } from "./Paneles";
-import { AhorroCostos } from "./AhorroCostos";
+import { AhorroLogbooks, AhorroPlanes } from "./AhorroCostos";
 
 const ALTO_BARRA = 56;
 
@@ -95,7 +95,8 @@ export function Recorrido() {
       <div>
         <Barra rol={escena.rol} i={i} total={escenas.length} atras={() => ir(i - 1)} siguiente={seguir} ultima={ultima} sinSiguiente />
         <div style={{ paddingTop: ALTO_BARRA }}>
-          {escena.pantalla === "ahorroCostos" && <AhorroCostos />}
+          {escena.pantalla === "ahorroPlanes" && <AhorroPlanes siguiente={seguir} />}
+          {escena.pantalla === "ahorroLogbooks" && <AhorroLogbooks />}
           {escena.pantalla === "queTieneHoy" && <QueTieneHoy siguiente={seguir} />}
           {escena.pantalla === "acp" && <Acp siguiente={seguir} />}
           {escena.pantalla === "acpCierre" && <AcpCierre siguiente={seguir} />}

@@ -14,7 +14,8 @@ const EXTRAS = FUNCIONALIDADES.filter((f) => f.plan === "complemento" || f.plan 
  * Logbooks y la Feria van aparte: se suman a cualquier plan. Sin precios aquí:
  * el precio sale abajo, con el plan elegido.
  */
-export function TablaPlanes() {
+/** `sinExtras`: sin los interruptores de Logbooks y Feria (Ahorrar costos los pregunta en otro paso). */
+export function TablaPlanes({ sinExtras = false }: { sinExtras?: boolean } = {}) {
   const { estado, cotizacion: c, despachar } = useConfigurador();
   // -1 con Solo Logbooks: ninguna columna marcada.
   const elegido = ORDEN.indexOf(c.plan.id as IdPlan);
@@ -73,7 +74,7 @@ export function TablaPlanes() {
         </table>
       </div>
 
-      <div className="space-y-2">
+      {!sinExtras && <div className="space-y-2">
         <p className="text-sm font-semibold text-gray-700">Se suman a cualquier plan</p>
         <ul className="grid gap-2 sm:grid-cols-2">
           {EXTRAS.map((f) => {
@@ -96,7 +97,7 @@ export function TablaPlanes() {
             );
           })}
         </ul>
-      </div>
+      </div>}
     </div>
   );
 }

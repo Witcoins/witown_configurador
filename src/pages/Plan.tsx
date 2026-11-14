@@ -1,5 +1,5 @@
 import { useConfigurador } from "@/lib/estado";
-import { nombreCotizacion, pesos } from "@/lib/precio";
+import { nombreCotizacion } from "@/lib/precio";
 import { medir } from "@/lib/analitica";
 import { useAvance } from "@/lib/progreso";
 import { CuantosEstudiantes, TablaPlanes } from "@/components/TablaPlanes";
@@ -34,7 +34,6 @@ export function Plan() {
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-[#554884]">{nombreCotizacion(c)}</p>
-            <p className="text-xl font-extrabold text-[#443773]">{pesos(c.porEstudiante)} <span className="text-xs font-normal text-gray-500">/estudiante al año</span></p>
             {c.porCotizar.length > 0 && <p className="text-xs text-gray-500">+ {c.porCotizar.join(", ")} por cotizar</p>}
           </div>
           <div className="flex gap-2">

@@ -48,9 +48,6 @@ export function Portada({ empezar }: { empezar: () => void }) {
         <h1 className="text-[clamp(34px,6vw,68px)] font-extrabold leading-[1.05] [text-shadow:0_2px_22px_rgba(20,6,14,.6)]">
           Imagine i'Witown en <em className="not-italic text-[#d9c8ff]">{colegio}</em>
         </h1>
-        <p className="max-w-[46ch] text-lg text-white/90 [text-shadow:0_2px_22px_rgba(20,6,14,.6)]">
-          Aprendizaje, comunicación con las familias y la vida del colegio, en una sola plataforma.
-        </p>
         <p className="inline-flex items-center gap-2.5 text-[clamp(17px,2.2vw,24px)] font-bold [text-shadow:0_2px_22px_rgba(20,6,14,.6)]">
           <span className="hidden h-0.5 w-8 rounded bg-[#b79cff] sm:inline-block" />
           Véala funcionando, como si ya fuera suya

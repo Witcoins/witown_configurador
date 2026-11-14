@@ -26,7 +26,7 @@ export interface PasoTutorial {
 }
 
 export type Panel = "elegirTarea" | "alejandro" | "feria";
-export type Pantalla = "ahorroCostos" | "queTieneHoy" | "acp" | "acpCierre" | "quienUsa" | "contenido" | "resultadosReales";
+export type Pantalla = "ahorroPlanes" | "ahorroLogbooks" | "queTieneHoy" | "acp" | "acpCierre" | "quienUsa" | "contenido" | "resultadosReales";
 
 export interface Escena {
   id: string;
@@ -53,8 +53,13 @@ const centro = (titulo: string, texto: string): PasoTutorial => ({ objetivo: nul
 const reporte = (rol = "Resultados reales"): Escena => ({ id: "reporte", url: "resultados-reales", rol, pantalla: "resultadosReales" });
 
 export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
-  // Una sola pantalla, sin visita guiada (decisión de la dueña, 2026-11-14).
-  ahorro: [{ id: "ahorro", url: "logbooks-y-planes", rol: "Ahorrar costos", pantalla: "ahorroCostos" }],
+  // Por pasos y sin visita guiada (decisión de la dueña, 2026-11-14): lo que
+  // tiene hoy, los planes y los Logbooks (y la Feria); el precio, solo después de los datos.
+  ahorro: [
+    { id: "hoy", url: "su-colegio-hoy", rol: "Ahorrar costos", pantalla: "queTieneHoy" },
+    { id: "planes", url: "planes", rol: "Ahorrar costos", pantalla: "ahorroPlanes" },
+    { id: "logbooks", url: "logbooks", rol: "Ahorrar costos", pantalla: "ahorroLogbooks" },
+  ],
 
   resultados: [
     { id: "acp", url: "apertura", rol: "Mejorar resultados", pantalla: "acp" },

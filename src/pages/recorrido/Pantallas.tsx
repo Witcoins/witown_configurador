@@ -41,7 +41,7 @@ export function QueTieneHoy({ siguiente }: { siguiente: () => void }) {
         </div>
         <div className="flex justify-end">
           <BotonSiguiente onClick={() => { despachar({ tipo: "actualConfirmado" }); medir("ahorro_actual"); siguiente(); }}>
-            Ver i'Witown →
+            Ver los planes →
           </BotonSiguiente>
         </div>
       </div>
