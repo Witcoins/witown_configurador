@@ -39,7 +39,7 @@ export interface Escena {
   panel?: Panel;
   /** O una pantalla propia del configurador, en vez de una plataforma. */
   pantalla?: Pantalla;
-  /** La app del estudiante juega la tarea (motor real, una partida por enlace). */
+  /** La app del estudiante juega la tarea (motor real; partidas por enlace y por día: ver configuradorJugar). */
   jugar?: boolean;
   /** Su ruta, por rol (`/<camino>/<url>`). Si no se da, la del `id`. */
   url?: string;

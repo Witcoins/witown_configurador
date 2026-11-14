@@ -15,16 +15,19 @@ function Flotante({ titulo, children }: { titulo: string; children: React.ReactN
 
 const normalizar = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
+/** Lo mínimo que se acepta como tema escrito (lo mismo que pide configuradorJugar). */
+export const MIN_TEMA = 3;
+
 /**
  * Mejorar resultados, como docente: dos pasos y a las preguntas. 1) la
- * asignatura, 2) el tema y el subtema, entre los temas reales del catálogo de
- * la demo (no se crean temas nuevos: ver configuradorJugar). Sin formularios:
- * la duración queda en la de por defecto.
+ * asignatura, 2) el tema: lo escribe (la IA lo revisa y genera las preguntas)
+ * o elige uno de los sugeridos, que salen del banco y cargan más rápido (ver
+ * configuradorJugar). Sin formularios: la duración queda en la de por defecto.
  */
 export function ElegirTarea({ siguiente }: { siguiente: () => void }) {
   const { estado, despachar } = useConfigurador();
   const [temas, setTemas] = useState<Subtema[]>([]);
-  const [busqueda, setBusqueda] = useState("");
+  const [busqueda, setBusqueda] = useState(() => estado.tarea.subtema);
   const [sinCatalogo, setSinCatalogo] = useState(false);
   useEffect(() => {
     leerSubtemas().then((r) => setTemas(r.temas)).catch(() => setSinCatalogo(true));
@@ -33,9 +36,15 @@ export function ElegirTarea({ siguiente }: { siguiente: () => void }) {
   const asignaturas = Array.from(new Set(temas.map((x) => x.asignatura)));
   const asignatura = asignaturas.includes(t.asignatura) ? t.asignatura : "";
   const elegido = temas.find((x) => x.asignatura === t.asignatura && x.subtema === t.subtema);
+  const escrito = !!asignatura && t.subtema.trim().length >= MIN_TEMA;
   const q = normalizar(busqueda.trim());
   const deLaAsignatura = temas.filter((x) => x.asignatura === asignatura);
   const resultados = q ? deLaAsignatura.filter((x) => normalizar(`${x.tema} ${x.subtema}`).includes(q)) : deLaAsignatura;
+  const escribir = (v: string) => {
+    setBusqueda(v);
+    const limpio = v.replace(/\s+/g, " ").trim();
+    despachar({ tipo: "tarea", valor: { asignatura, tema: limpio, subtema: limpio } });
+  };
 
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 p-4 font-nunito">
@@ -43,11 +52,11 @@ export function ElegirTarea({ siguiente }: { siguiente: () => void }) {
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-[#554884]">Paso 1 de 3</p>
           <p className="text-lg font-extrabold text-[#333]">Elija lo que su estudiante va a estudiar</p>
-          <p className="text-sm text-gray-600">La asignatura y luego el tema.</p>
+          <p className="text-sm text-gray-600">La asignatura y luego el tema que usted quiera.</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {asignaturas.map((a) => (
               <button key={a} aria-pressed={asignatura === a}
-                onClick={() => { setBusqueda(""); despachar({ tipo: "tarea", valor: { asignatura: a, tema: "", subtema: "" } }); }}
+                onClick={() => { if (a === asignatura) return; setBusqueda(""); despachar({ tipo: "tarea", valor: { asignatura: a, tema: "", subtema: "" } }); }}
                 className={`rounded-full px-4 py-1.5 text-sm font-semibold ${asignatura === a ? "bg-[#554884] text-white" : "bg-[#F5E6D3] text-[#333]"}`}>
                 {a}
               </button>
@@ -62,27 +71,31 @@ export function ElegirTarea({ siguiente }: { siguiente: () => void }) {
 
         {asignatura && (
           <div>
-            {deLaAsignatura.length > 6 && (
-              <input className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-[#554884] focus:outline-none"
-                placeholder="Busque un tema…" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} aria-label="Buscar un tema" />
-            )}
-            <div className="mt-2 max-h-56 space-y-1 overflow-y-auto">
+            <input className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#554884] focus:outline-none"
+              placeholder="Escriba el tema, por ejemplo: el ciclo del agua" maxLength={80}
+              value={busqueda} onChange={(e) => escribir(e.target.value)} aria-label="Tema" />
+            <p className="mt-1 text-xs text-gray-500">
+              {elegido ? "Tema sugerido: carga más rápido." : "O elija uno de estos:"}
+            </p>
+            <div className="mt-1 max-h-48 space-y-1 overflow-y-auto">
               {resultados.map((x) => {
                 const activo = elegido === x;
                 return (
                   <button key={`${x.asignatura}|${x.subtema}`} aria-pressed={activo}
-                    onClick={() => despachar({ tipo: "tarea", valor: { asignatura: x.asignatura, tema: x.tema, subtema: x.subtema } })}
+                    onClick={() => { setBusqueda(x.subtema); despachar({ tipo: "tarea", valor: { asignatura: x.asignatura, tema: x.tema, subtema: x.subtema } }); }}
                     className={`w-full rounded-xl border-2 px-3 py-1.5 text-left text-sm ${activo ? "border-[#554884] bg-[#554884]/10" : "border-gray-200"}`}>
                     <span className="block text-[11px] text-gray-500">{x.tema}</span>{x.subtema}
                   </button>
                 );
               })}
-              {resultados.length === 0 && <p className="text-xs text-gray-500">No hay temas con esa palabra. Pruebe con otra.</p>}
+              {resultados.length === 0 && escrito && (
+                <p className="text-xs text-gray-500">Las preguntas de «{t.subtema}» se crearán en el momento.</p>
+              )}
             </div>
           </div>
         )}
 
-        <button onClick={siguiente} disabled={!elegido}
+        <button onClick={siguiente} disabled={!elegido && !escrito}
           className="w-full rounded-full bg-[hsl(274_85%_37%)] px-4 py-2.5 font-bold text-white disabled:opacity-50">
           Paso 2: ver las preguntas →
         </button>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ESCENAS } from "@/config/escenas";
 import { useConfigurador } from "@/lib/estado";
 import { medir } from "@/lib/analitica";
@@ -8,7 +8,7 @@ import { precargarEscena } from "@/lib/precalentar";
 import { Contenido } from "@/pages/caminos/Contenido";
 import { VistaPrevia, NOMBRES_PLATAFORMA, type EventoVitrina } from "@/components/VistaPrevia";
 import { Acp, AcpCierre, QueTieneHoy, QuienUsa, ResultadosReales } from "./Pantallas";
-import { Alejandro, ElegirTarea, Feria } from "./Paneles";
+import { Alejandro, ElegirTarea, Feria, MIN_TEMA } from "./Paneles";
 
 const ALTO_BARRA = 56;
 
@@ -20,7 +20,7 @@ const ALTO_BARRA = 56;
 /** Si el rector no asignó tarea, se juega un tema del catálogo de la demo (la pantalla dice cuál). */
 const POR_DEFECTO = { asignatura: "Matemáticas", tema: "Operaciones con fracciones", subtema: "Suma y resta de fracciones con igual denominador" };
 function tareaOPorDefecto<T extends { asignatura: string; tema: string; subtema: string; minutos: number }>(t: T): T {
-  return t.asignatura && t.subtema ? t : { ...t, ...POR_DEFECTO };
+  return t.asignatura && t.subtema.trim().length >= MIN_TEMA ? t : { ...t, ...POR_DEFECTO };
 }
 
 export function Recorrido() {
@@ -33,6 +33,10 @@ export function Recorrido() {
   const [jugado, setJugado] = useState(false);
   // La guía de la escena terminó: la plataforma se tapa y se señala "Siguiente".
   const [guiaFin, setGuiaFin] = useState(false);
+  // Si ya jugó este tema en esta visita al entrar a la escena: no se pide otra
+  // partida (cada una gasta un cupo del día y pisaría la que sí jugó).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const jugoAlEntrar = useMemo(() => estado.jugo, [estado.ruta, i]);
   const escenaRef = useRef(i);
   escenaRef.current = i;
   useAvance(escena ? `escena-${estado.ruta}-${escena.id}` : null, 10 + i);
@@ -102,21 +106,22 @@ export function Recorrido() {
   }
 
   // Una plataforma real.
-  const esperaJuego = escena.jugar && !jugado && !estado.jugo;
+  const esperaJuego = escena.jugar && !jugado && !jugoAlEntrar;
   // Sin explorar sola: terminada la guía (o, al jugar, terminado el juego), toca "Siguiente".
   // Escenas con recuadro del configurador (Feria, elegir tarea): el recuadro se sigue usando.
-  const tapar = escena.jugar ? (jugado || estado.jugo) && guiaFin : guiaFin && !!escena.tutorial?.length;
+  // Ya jugado este tema al entrar: sin guía ni juego, tapado desde el comienzo.
+  const tapar = escena.jugar ? jugoAlEntrar || (jugado && guiaFin) : guiaFin && !!escena.tutorial?.length;
   return (
     <div className="fixed inset-0 bg-white">
       <Barra rol={escena.rol} plataforma={escena.plataforma ? NOMBRES_PLATAFORMA[escena.plataforma] : ""}
         i={i} total={escenas.length} atras={() => ir(i - 1)} siguiente={() => ir(i + 1)} ultima={ultima}
-        verGuia={escena.tutorial?.length ? () => setVuelta((v) => v + 1) : undefined}
+        verGuia={escena.tutorial?.length && !(escena.jugar && jugoAlEntrar) ? () => setVuelta((v) => v + 1) : undefined}
         destacarSiguiente={!esperaJuego}
         libre={enlace.ruta === "libre"} />
       <div className="absolute inset-x-0 bottom-0" style={{ top: ALTO_BARRA }}>
         <VistaPrevia key={`${estado.ruta}-${escena.id}`} plataforma={escena.plataforma!} ir={escena.ir ?? null}
-          tutorial={escena.tutorial} tutorialId={`${escena.id}-${vuelta}`} mostrar={escena.mostrar}
-          jugar={escena.jugar ? tareaOPorDefecto(estado.tarea) : null} onEvento={alEvento}
+          tutorial={escena.jugar && jugoAlEntrar ? undefined : escena.tutorial} tutorialId={`${escena.id}-${vuelta}`} mostrar={escena.mostrar}
+          jugar={escena.jugar && !jugoAlEntrar ? tareaOPorDefecto(estado.tarea) : null} onEvento={alEvento}
           onLista={() => setGuiaFin(false)} />
         {tapar && <div className="absolute inset-0 z-[15] cursor-not-allowed" aria-hidden />}
         {escena.panel === "elegirTarea" && <ElegirTarea siguiente={() => ir(i + 1)} />}
