@@ -52,7 +52,7 @@ export function ElegirTarea({ siguiente }: { siguiente: () => void }) {
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-[#554884]">Paso 1 de 3</p>
           <p className="text-lg font-extrabold text-[#333]">Elija lo que su estudiante va a estudiar</p>
-          <p className="text-sm text-gray-600">La asignatura y luego el tema que usted quiera.</p>
+          <p className="text-sm text-gray-600">Su estudiante está en Cuarto de primaria. Elija la asignatura y escriba el tema que quiera.</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {asignaturas.map((a) => (
               <button key={a} aria-pressed={asignatura === a}
