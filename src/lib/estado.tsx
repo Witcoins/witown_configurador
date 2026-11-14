@@ -36,7 +36,7 @@ export interface Estado {
   /** El "¿Qué tiene hoy?" del camino Ahorrar costos ya se respondió. */
   actualConfirmado: boolean;
   /** Áreas y cursos con Logbooks propios (camino Contenido). */
-  logbooks: { areas: string[]; cursos: string[]; color: string; plantilla: string };
+  logbooks: { areas: string[]; cursos: string[]; color: string; plantilla: string; encuadernacion?: "argollado" | "cosido" };
   /** Logo del colegio como data URL. Solo en memoria: no se guarda ni se sube. */
   logo: string | null;
   /** El enlace ya usó su única partida (en cualquier camino). */

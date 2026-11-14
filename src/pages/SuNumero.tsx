@@ -4,7 +4,7 @@ import { useConfigurador } from "@/lib/estado";
 import { enviarLead } from "@/lib/api";
 import { medir } from "@/lib/analitica";
 import { avanzar, useAvance } from "@/lib/progreso";
-import { pesos } from "@/lib/precio";
+import { nombreCotizacion, pagaHoyPorEstudiante, pesos } from "@/lib/precio";
 
 const campo = "w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-purple-600 focus:outline-none";
 
@@ -84,6 +84,12 @@ export function SuNumero() {
   }
 
   const prendidas = FUNCIONALIDADES.filter((f) => estado.prendidas.includes(f.id));
+  // Si dijo lo que paga hoy (camino Ahorrar costos), se compara; solo después de los datos.
+  const hoy = estado.actualConfirmado ? pagaHoyPorEstudiante(estado.actual) : null;
+  // Sin Logbooks el colegio sigue comprando los textos: se suman a i'Witown.
+  const textos = c.conLogbooks ? 0 : estado.actual.pagan_padres_al_anio ?? 0;
+  const nuevo = c.porEstudiante + textos;
+  const max = Math.max(hoy ?? 0, nuevo, 1);
   return (
     <section className="space-y-6">
       <header className="space-y-1">
@@ -95,7 +101,7 @@ export function SuNumero() {
         <div className="rounded-2xl bg-purple-700 p-5 text-white">
           <p className="text-sm opacity-80">Por estudiante al año</p>
           <p className="text-3xl font-bold">{pesos(c.porEstudiante)}</p>
-          <p className="text-sm opacity-80">Plan {c.plan.nombre}{c.conLogbooks ? " con Logbooks" : ""}</p>
+          <p className="text-sm opacity-80">{nombreCotizacion(c)}</p>
         </div>
         <div className="rounded-2xl bg-white p-5 shadow-sm">
           <p className="text-sm text-gray-500">Total al año, {estado.estudiantes} estudiantes</p>
@@ -105,6 +111,20 @@ export function SuNumero() {
       </div>
       {c.porCotizar.length > 0 && (
         <p className="text-sm text-gray-600">{c.porCotizar.join(" y ")}: su asesora se lo cotiza aparte.</p>
+      )}
+
+      {hoy != null && (
+        <section className="space-y-3 rounded-2xl bg-white p-5 shadow-sm">
+          <p className="font-semibold text-gray-800">Compare · por estudiante al año</p>
+          <Barra etiqueta="Hoy, aprox. (textos + plataforma)" valor={hoy} max={max} color="bg-gray-400" />
+          <Barra etiqueta={`i'Witown · ${nombreCotizacion(c)}${textos ? " + sus textos" : ""}`} valor={nuevo} max={max} color="bg-purple-700" />
+          <p className={`font-bold ${hoy - nuevo >= 0 ? "text-green-700" : "text-purple-900"}`}>
+            {hoy - nuevo >= 0
+              ? `Ahorra ${pesos(hoy - nuevo)} por estudiante: ${pesos((hoy - nuevo) * estado.estudiantes)} al año.`
+              : `Son ${pesos(nuevo - hoy)} más por estudiante, con todo en un solo lugar.`}
+          </p>
+          {textos > 0 && <p className="text-sm text-gray-600">Con sus propios Logbooks, los textos de editorial salen de la cuenta.</p>}
+        </section>
       )}
 
       <div className="rounded-2xl bg-white p-5 shadow-sm">
@@ -131,5 +151,16 @@ export function SuNumero() {
         </button>
       </div>
     </section>
+  );
+}
+
+function Barra({ etiqueta, valor, max, color }: { etiqueta: string; valor: number; max: number; color: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between gap-2 text-sm"><span className="text-gray-700">{etiqueta}</span><b>{pesos(valor)}</b></div>
+      <div className="h-6 overflow-hidden rounded-full bg-gray-100">
+        <div className={`h-full ${color} transition-all duration-500`} style={{ width: `${Math.round((valor / max) * 100)}%` }} />
+      </div>
+    </div>
   );
 }

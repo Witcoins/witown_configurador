@@ -9,6 +9,7 @@ import { Contenido } from "@/pages/caminos/Contenido";
 import { VistaPrevia, NOMBRES_PLATAFORMA, type EventoVitrina } from "@/components/VistaPrevia";
 import { Acp, AcpCierre, QueTieneHoy, QuienUsa, ResultadosReales } from "./Pantallas";
 import { Alejandro, ElegirTarea, Feria, MIN_TEMA } from "./Paneles";
+import { AhorroLogbooks, AhorroPlanes } from "./AhorroCostos";
 
 const ALTO_BARRA = 56;
 
@@ -94,6 +95,8 @@ export function Recorrido() {
       <div>
         <Barra rol={escena.rol} i={i} total={escenas.length} atras={() => ir(i - 1)} siguiente={seguir} ultima={ultima} sinSiguiente />
         <div style={{ paddingTop: ALTO_BARRA }}>
+          {escena.pantalla === "ahorroPlanes" && <AhorroPlanes siguiente={seguir} />}
+          {escena.pantalla === "ahorroLogbooks" && <AhorroLogbooks />}
           {escena.pantalla === "queTieneHoy" && <QueTieneHoy siguiente={seguir} />}
           {escena.pantalla === "acp" && <Acp siguiente={seguir} />}
           {escena.pantalla === "acpCierre" && <AcpCierre siguiente={seguir} />}
@@ -140,7 +143,7 @@ function AvisoSiguiente({ ultima }: { ultima: boolean }) {
       <div className="relative max-w-[280px] rounded-2xl bg-[hsl(274_85%_37%)] px-4 py-3 text-white shadow-2xl">
         <span className="absolute -top-2 right-8 h-4 w-4 rotate-45 bg-[hsl(274_85%_37%)]" aria-hidden />
         <p className="font-extrabold">Listo.</p>
-        <p className="text-sm">Toque «{ultima ? "Arme su plan" : "Siguiente"}» para continuar.</p>
+        <p className="text-sm">Toque «{ultima ? "Conozca su precio" : "Siguiente"}» para continuar.</p>
       </div>
     </div>
   );
@@ -170,7 +173,7 @@ function Barra({ rol, plataforma, i, total, atras, siguiente, ultima, verGuia, s
         {!sinSiguiente && (
           <button onClick={siguiente}
             className={`rounded-full px-4 py-1.5 text-sm font-bold text-white transition ${destacarSiguiente ? "bg-[hsl(274_85%_37%)]" : "bg-gray-400"}`}>
-            {ultima ? "Arme su plan →" : "Siguiente →"}
+            {ultima ? "Conozca su precio →" : "Siguiente →"}
           </button>
         )}
       </div>

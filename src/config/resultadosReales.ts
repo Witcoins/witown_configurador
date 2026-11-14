@@ -6,7 +6,9 @@
  * 2026-11-12, año 2026; los porcentajes de actividad salen del informe de uso
  * generado el 2026-09-20. Las de "Mejorar resultados" salen del seguimiento de
  * WiwiQuest del 2026-11-13 (75 estudiantes; debilidad = principio flojo por
- * estudiante y tema; "4 respuestas" es la mediana hasta la primera). Al
+ * estudiante y tema; "4 respuestas" es la mediana hasta la primera). Las
+ * 23.847 preguntas son las del banco de WiwiQuest (generadas con IA, más de 20
+ * asignaturas), contadas en Firestore en la misma consulta de cifras de uso. Al
  * actualizarlas, cambiar también estas fechas.
  */
 import type { Ruta } from "@/lib/api";
@@ -24,7 +26,7 @@ export const RESULTADOS_REALES: Partial<Record<Exclude<Ruta, "libre">, { titulo:
     indicadores: [
       { cifra: "12.859", dice: "firmas digitales de circulares, sin imprimir una hoja" },
       { cifra: "3.059", dice: "mensajes del colegio a las familias, sin grupos de WhatsApp" },
-      { cifra: "100 %", dice: "de los docentes y directivos la usan" },
+      { cifra: "96 %", dice: "de los papás la usan activamente", acento: "MUY ALTO" },
     ],
   },
   resultados: {
@@ -40,8 +42,9 @@ export const RESULTADOS_REALES: Partial<Record<Exclude<Ruta, "libre">, { titulo:
     titulo: "La usan de verdad",
     indicadores: [
       { cifra: "96 %", dice: "de los papás la usan activamente", acento: "MUY ALTO" },
+      { cifra: "3.059", dice: "mensajes del colegio a las familias, sin grupos de WhatsApp" },
+      { cifra: "23.847", dice: "preguntas generadas con IA y alineadas al currículo" },
       { cifra: "100 %", dice: "de los papás tienen a su hijo vinculado" },
-      { cifra: "100 %", dice: "de los docentes y directivos la usan" },
     ],
   },
 };
