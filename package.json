@@ -7,9 +7,14 @@
     "dev": "vite",
     "build": "tsc --noEmit -p tsconfig.app.json && vite build",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "canal": "node scripts/canal.mjs",
+    "vitrinas": "node scripts/vitrinas.mjs",
+    "local": "node scripts/local.mjs"
   },
   "dependencies": {
+    "@fontsource/nunito": "^5.1.0",
+    "jspdf": "^4.2.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },

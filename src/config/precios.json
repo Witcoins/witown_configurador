@@ -1,0 +1,14 @@
+{
+  "_nota": "Pesos colombianos por estudiante al año, antes de IVA. Verificar antes de publicar. Editar aquí, no en el código.",
+  "planes": [
+    { "id": "basico", "nombre": "Básico", "plataforma": 90000, "con_logbooks": 210000 },
+    { "id": "cafeteria", "nombre": "Cafetería + Anuncios", "plataforma": 110000, "con_logbooks": 230000 },
+    { "id": "completo", "nombre": "Completo", "plataforma": 160000, "con_logbooks": 280000 }
+  ],
+  "logbooks": 120000,
+  "complementos": {
+    "feria": { "nombre": "Feria i'Witown", "por_estudiante": null },
+    "olimpiadas": { "nombre": "Olimpiadas", "por_estudiante": null }
+  },
+  "estudiantes": { "minimo": 50, "maximo": 3000, "sugerido": 400 }
+}

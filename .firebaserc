@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "witcoins-network",
+    "witown": "witcoins-network"
+  }
+}
