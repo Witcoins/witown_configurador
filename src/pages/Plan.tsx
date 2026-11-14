@@ -62,7 +62,7 @@ export function Plan() {
         {hoy != null && (
           <section className="space-y-3 rounded-2xl border-2 border-[#E6E6E6] bg-white p-5">
             <p className="font-extrabold text-[#443773]">Pare y compare · por estudiante al año</p>
-            <Barra etiqueta="Hoy (editorial + plataforma)" valor={hoy} max={max} color="bg-gray-400" />
+            <Barra etiqueta="Hoy, aprox. (textos + plataforma)" valor={hoy} max={max} color="bg-gray-400" />
             <Barra etiqueta={`i'Witown · ${c.plan.nombre}${c.conLogbooks ? " con Logbooks" : ""}`} valor={c.porEstudiante} max={max} color="bg-[#554884]" />
             <p className={`font-bold ${hoy - c.porEstudiante >= 0 ? "text-green-700" : "text-[#443773]"}`}>
               {hoy - c.porEstudiante >= 0

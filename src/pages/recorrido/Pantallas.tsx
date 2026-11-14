@@ -1,10 +1,15 @@
 import { useConfigurador } from "@/lib/estado";
-import { pesos } from "@/lib/precio";
 import { medir } from "@/lib/analitica";
 import { RESULTADOS_REALES } from "@/config/resultadosReales";
 import { BotonSiguiente, Insignia, Opcion, PantallaWiwiQuest, TarjetaPregunta } from "@/components/Pregunta";
 
-const EDITORIALES = ["SM", "Santillana", "Norma", "Richmond", "Otra"];
+/** Rangos de precio al año (pesos). Se guarda el punto medio: la comparación del plan dice "aprox.". */
+const RANGOS = [
+  { texto: "Menos de $100.000", desde: 0, hasta: 100000, medio: 50000 },
+  { texto: "$100.000 a $250.000", desde: 100000, hasta: 250000, medio: 175000 },
+  { texto: "$250.000 a $400.000", desde: 250000, hasta: 400000, medio: 325000 },
+  { texto: "Más de $400.000", desde: 400000, hasta: Infinity, medio: 450000 },
+];
 
 /** Camino Ahorrar costos — "¿Qué tiene hoy?", con valores ya prellenados. */
 export function QueTieneHoy({ siguiente }: { siguiente: () => void }) {
@@ -16,31 +21,20 @@ export function QueTieneHoy({ siguiente }: { siguiente: () => void }) {
         <div className="text-center"><Insignia texto="Ahorrar costos" /></div>
         <TarjetaPregunta>¿Qué tiene hoy? Ajuste los valores: ya vienen con lo más común.</TarjetaPregunta>
         <div className="space-y-5 rounded-2xl border-2 border-[#E6E6E6] bg-white/95 p-5">
-          <div className="space-y-2">
-            <p className="font-semibold text-[#333]">Editorial</p>
-            <div className="flex flex-wrap gap-2">
-              {EDITORIALES.map((e) => (
-                <button key={e} aria-pressed={a.editorial === e} onClick={() => despachar({ tipo: "actual", valor: { editorial: e } })}
-                  className={`rounded-full px-4 py-1.5 text-sm ${a.editorial === e ? "bg-[#554884] text-white" : "bg-[#F5E6D3] text-[#333]"}`}>{e}</button>
-              ))}
-            </div>
-          </div>
           <Deslizador etiqueta="Textos por estudiante" min={0} max={12} paso={1} valor={a.libros_por_estudiante ?? 0}
             formato={(n) => String(n)} cambiar={(n) => despachar({ tipo: "actual", valor: { libros_por_estudiante: n } })} />
-          <Deslizador etiqueta="Lo que pagan los padres por ellos, al año" min={0} max={600000} paso={10000}
-            valor={a.pagan_padres_al_anio ?? 0} formato={pesos}
+          <Rangos etiqueta="Lo que pagan los padres por los textos, al año" valor={a.pagan_padres_al_anio}
             cambiar={(n) => despachar({ tipo: "actual", valor: { pagan_padres_al_anio: n } })} />
           <div className="space-y-2">
             <p className="font-semibold text-[#333]">¿Tiene plataforma aparte?</p>
             <div className="flex gap-2">
-              <button aria-pressed={a.tiene_plataforma} onClick={() => despachar({ tipo: "actual", valor: { tiene_plataforma: true, costo_plataforma_al_anio: a.costo_plataforma_al_anio ?? 40000 } })}
+              <button aria-pressed={a.tiene_plataforma} onClick={() => despachar({ tipo: "actual", valor: { tiene_plataforma: true, costo_plataforma_al_anio: a.costo_plataforma_al_anio ?? RANGOS[0].medio } })}
                 className={`rounded-full px-4 py-1.5 text-sm ${a.tiene_plataforma ? "bg-[#554884] text-white" : "bg-[#F5E6D3] text-[#333]"}`}>Sí</button>
               <button aria-pressed={!a.tiene_plataforma} onClick={() => despachar({ tipo: "actual", valor: { tiene_plataforma: false } })}
                 className={`rounded-full px-4 py-1.5 text-sm ${!a.tiene_plataforma ? "bg-[#554884] text-white" : "bg-[#F5E6D3] text-[#333]"}`}>No tenemos plataforma</button>
             </div>
             {a.tiene_plataforma && (
-              <Deslizador etiqueta="Costo por estudiante, al año" min={0} max={300000} paso={5000}
-                valor={a.costo_plataforma_al_anio ?? 0} formato={pesos}
+              <Rangos etiqueta="Costo de la plataforma por estudiante, al año" valor={a.costo_plataforma_al_anio}
                 cambiar={(n) => despachar({ tipo: "actual", valor: { costo_plataforma_al_anio: n } })} />
             )}
           </div>
@@ -125,7 +119,7 @@ export function ResultadosReales({ siguiente, ultima = false }: { siguiente: () 
           <Insignia texto="Resultados que hemos obtenido en su uso real" />
           <h2 className="text-3xl font-extrabold leading-tight text-[#333] lg:text-5xl">{r.titulo}</h2>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className={`grid gap-4 ${r.indicadores.length === 4 ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3"}`}>
           {r.indicadores.map((x) => (
             <div key={x.dice} className="space-y-2 rounded-2xl border-2 border-[#E6E6E6] bg-white/95 p-6 shadow-sm">
               <p className="text-4xl font-extrabold text-[#443773] lg:text-5xl">{x.cifra}</p>
@@ -173,5 +167,22 @@ function Deslizador({ etiqueta, min, max, paso, valor, formato, cambiar }: {
       <input type="range" min={min} max={max} step={paso} value={valor} onChange={(e) => cambiar(Number(e.target.value))}
         className="w-full accent-[#554884]" />
     </label>
+  );
+}
+
+function Rangos({ etiqueta, valor, cambiar }: { etiqueta: string; valor: number | null; cambiar: (n: number) => void }) {
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-semibold text-[#333]">{etiqueta}</p>
+      <div className="flex flex-wrap gap-2">
+        {RANGOS.map((r) => {
+          const elegido = valor != null && valor >= r.desde && valor < r.hasta;
+          return (
+            <button key={r.texto} aria-pressed={elegido} onClick={() => { if (!elegido) cambiar(r.medio); }}
+              className={`rounded-full px-4 py-1.5 text-sm ${elegido ? "bg-[#554884] text-white" : "bg-[#F5E6D3] text-[#333]"}`}>{r.texto}</button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

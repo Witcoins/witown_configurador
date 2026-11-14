@@ -32,6 +32,7 @@ export function VistaPrevia({
   mostrar = [],
   alto = "100%",
   onEvento,
+  onLista,
 }: {
   plataforma: Plataforma;
   ir?: string | null;
@@ -44,6 +45,8 @@ export function VistaPrevia({
   jugar?: { asignatura: string; tema: string; subtema: string; minutos: number } | null;
   alto?: string;
   onEvento?: (e: EventoVitrina) => void;
+  /** La app avisó que está lista (al arrancar o al recargarse): el tutorial se vuelve a mostrar. */
+  onLista?: () => void;
 }) {
   const { estado } = useConfigurador();
   const marco = useRef<HTMLIFrameElement>(null);
@@ -51,6 +54,8 @@ export function VistaPrevia({
   const [lista, setLista] = useState(0);
   const eventos = useRef(onEvento);
   eventos.current = onEvento;
+  const avisarLista = useRef(onLista);
+  avisarLista.current = onLista;
 
   const enviar = (mensaje: Record<string, unknown>) =>
     marco.current?.contentWindow?.postMessage({ fuente: "configurador", ...mensaje }, location.origin);
@@ -60,7 +65,10 @@ export function VistaPrevia({
       if (ev.origin !== location.origin || ev.source !== marco.current?.contentWindow) return;
       const d = ev.data;
       if (!d || d.fuente !== "vitrina" || typeof d.tipo !== "string") return;
-      if (d.tipo === "lista") setLista((n) => n + 1);
+      if (d.tipo === "lista") {
+        setLista((n) => n + 1);
+        avisarLista.current?.();
+      }
       else if (["tutorial-fin", "juego-empezo", "juego-fin", "juego-usado", "juego-respuesta", "tarea-asignada"].includes(d.tipo)) {
         eventos.current?.({ tipo: d.tipo, datos: d });
       }

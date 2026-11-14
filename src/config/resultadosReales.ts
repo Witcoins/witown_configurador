@@ -4,7 +4,10 @@
  * Cifras de un colegio que usa i'Witown, sin nombrarlo (decisión del equipo,
  * 2026-11-12). Solo indicadores fuertes. Leídas de Firestore en solo lectura el
  * 2026-11-12, año 2026; los porcentajes de actividad salen del informe de uso
- * generado el 2026-09-20. Al actualizarlas, cambiar también esta fecha.
+ * generado el 2026-09-20. Las de "Mejorar resultados" salen del seguimiento de
+ * WiwiQuest del 2026-11-13 (75 estudiantes; debilidad = principio flojo por
+ * estudiante y tema; "4 respuestas" es la mediana hasta la primera). Al
+ * actualizarlas, cambiar también estas fechas.
  */
 import type { Ruta } from "@/lib/api";
 
@@ -25,11 +28,12 @@ export const RESULTADOS_REALES: Partial<Record<Exclude<Ruta, "libre">, { titulo:
     ],
   },
   resultados: {
-    titulo: "Refuerzo real, fuera del salón",
+    titulo: "La A.C.P. encuentra a tiempo dónde se traba cada estudiante",
     indicadores: [
-      { cifra: "124.410", dice: "preguntas de refuerzo contestadas por los estudiantes" },
-      { cifra: "505 horas", dice: "de estudio fuera de clase" },
-      { cifra: "81 %", dice: "de acierto, y el colegio ve qué asignatura reforzar" },
+      { cifra: "13.158", dice: "debilidades detectadas a tiempo, por estudiante y tema" },
+      { cifra: "4 respuestas", dice: "le bastan para encontrar la primera debilidad" },
+      { cifra: "96 %", dice: "de los papás la usan activamente", acento: "MUY ALTO" },
+      { cifra: "62 temas", dice: "reforzados en promedio por cada estudiante" },
     ],
   },
   uso: {

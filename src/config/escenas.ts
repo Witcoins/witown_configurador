@@ -106,7 +106,7 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
         centro("Todo, en tiempo real", "Usted tiene la información de todos sus estudiantes, al día."),
         { objetivo: { texto: "Por grado / curso" }, accion: "clic", titulo: "Mire un curso", texto: "Haga clic en «Por grado / curso»." },
         { objetivo: { texto: "Ranking de asignaturas flojas" }, titulo: "Cada asignatura", texto: "En cuáles falla más el curso: ahí conviene hablar con el docente." },
-        { objetivo: { selector: "div.space-y-5 > select" }, titulo: "Cada curso", texto: "Elija el curso que quiera revisar, o véalos todos juntos." },
+        { objetivo: { selector: "div.space-y-5 > select" }, titulo: "Cada curso", texto: "Aquí se elige el curso a revisar, o se ven todos juntos." },
         { objetivo: { selector: "div.space-y-5 > div.grid" }, titulo: "Lo más relevante", texto: "Cuántos lo usan, cuánto aciertan y qué alumnos están en riesgo." },
       ],
     },

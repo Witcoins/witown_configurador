@@ -4,6 +4,7 @@ import { useConfigurador } from "@/lib/estado";
 import { medir } from "@/lib/analitica";
 import { avanzar, useAvance } from "@/lib/progreso";
 import { OPCIONES } from "@/pages/Bienvenida";
+import { precargarEscena } from "@/lib/precalentar";
 import { Contenido } from "@/pages/caminos/Contenido";
 import { VistaPrevia, NOMBRES_PLATAFORMA, type EventoVitrina } from "@/components/VistaPrevia";
 import { Acp, AcpCierre, QueTieneHoy, QuienUsa, ResultadosReales } from "./Pantallas";
@@ -30,6 +31,8 @@ export function Recorrido() {
   // Cambia para volver a mostrar el tutorial ("Ver la guía").
   const [vuelta, setVuelta] = useState(0);
   const [jugado, setJugado] = useState(false);
+  // La guía de la escena terminó: la plataforma se tapa y se señala "Siguiente".
+  const [guiaFin, setGuiaFin] = useState(false);
   const escenaRef = useRef(i);
   escenaRef.current = i;
   useAvance(escena ? `escena-${estado.ruta}-${escena.id}` : null, 10 + i);
@@ -38,8 +41,14 @@ export function Recorrido() {
     if (!escena) return;
     medir("escena", { ruta: estado.ruta || "", escena: escena.id });
     setJugado(false);
+    setGuiaFin(false);
+    // Mientras está aquí, se adelanta la escena siguiente (sus datos y su app).
+    const sig = escenas[i + 1];
+    if (sig?.plataforma) precargarEscena(enlace.e, sig.plataforma, sig.ir);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [estado.ruta, i]);
+  // "Ver la guía" de nuevo: se destapa mientras se muestra.
+  useEffect(() => setGuiaFin(false), [vuelta]);
 
   if (!escena) return null;
   const ultima = i === escenas.length - 1;
@@ -71,6 +80,7 @@ export function Recorrido() {
     if (e.tipo === "juego-fin") avanzar(enlace.e, "juego-fin", 31);
     if (e.tipo === "juego-empezo" || e.tipo === "juego-usado") despachar({ tipo: "jugo" });
     if (e.tipo === "juego-fin" || e.tipo === "juego-usado") setJugado(true);
+    if (e.tipo === "tutorial-fin") setGuiaFin(true);
   };
 
   // Una pantalla propia del configurador.
@@ -93,6 +103,9 @@ export function Recorrido() {
 
   // Una plataforma real.
   const esperaJuego = escena.jugar && !jugado && !estado.jugo;
+  // Sin explorar sola: terminada la guía (o, al jugar, terminado el juego), toca "Siguiente".
+  // Escenas con recuadro del configurador (Feria, elegir tarea): el recuadro se sigue usando.
+  const tapar = escena.jugar ? (jugado || estado.jugo) && guiaFin : guiaFin && !!escena.tutorial?.length;
   return (
     <div className="fixed inset-0 bg-white">
       <Barra rol={escena.rol} plataforma={escena.plataforma ? NOMBRES_PLATAFORMA[escena.plataforma] : ""}
@@ -103,10 +116,26 @@ export function Recorrido() {
       <div className="absolute inset-x-0 bottom-0" style={{ top: ALTO_BARRA }}>
         <VistaPrevia key={`${estado.ruta}-${escena.id}`} plataforma={escena.plataforma!} ir={escena.ir ?? null}
           tutorial={escena.tutorial} tutorialId={`${escena.id}-${vuelta}`} mostrar={escena.mostrar}
-          jugar={escena.jugar ? tareaOPorDefecto(estado.tarea) : null} onEvento={alEvento} />
+          jugar={escena.jugar ? tareaOPorDefecto(estado.tarea) : null} onEvento={alEvento}
+          onLista={() => setGuiaFin(false)} />
+        {tapar && <div className="absolute inset-0 z-[15] cursor-not-allowed" aria-hidden />}
         {escena.panel === "elegirTarea" && <ElegirTarea siguiente={() => ir(i + 1)} />}
         {escena.panel === "alejandro" && <Alejandro />}
         {escena.panel === "feria" && <Feria />}
+      </div>
+      {tapar && <AvisoSiguiente ultima={ultima} />}
+    </div>
+  );
+}
+
+/** El globo que señala "Siguiente" cuando la escena ya terminó. */
+function AvisoSiguiente({ ultima }: { ultima: boolean }) {
+  return (
+    <div role="status" aria-live="polite" className="fixed right-3 z-40 animate-aparecer font-nunito" style={{ top: ALTO_BARRA + 10 }}>
+      <div className="relative max-w-[280px] rounded-2xl bg-[hsl(274_85%_37%)] px-4 py-3 text-white shadow-2xl">
+        <span className="absolute -top-2 right-8 h-4 w-4 rotate-45 bg-[hsl(274_85%_37%)]" aria-hidden />
+        <p className="font-extrabold">Listo.</p>
+        <p className="text-sm">Toque «{ultima ? "Arme su plan" : "Siguiente"}» para continuar.</p>
       </div>
     </div>
   );
