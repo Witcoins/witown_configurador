@@ -19,7 +19,7 @@ export function QueTieneHoy({ siguiente }: { siguiente: () => void }) {
     <PantallaWiwiQuest>
       <div className="animate-aparecer space-y-5">
         <div className="text-center"><Insignia texto="Ahorrar costos" /></div>
-        <TarjetaPregunta>¿Qué tiene hoy? Ajuste los valores: ya vienen con lo más común.</TarjetaPregunta>
+        <TarjetaPregunta>¿Qué tiene hoy? Ajuste los valores.</TarjetaPregunta>
         <div className="space-y-5 rounded-2xl border-2 border-[#E6E6E6] bg-white/95 p-5">
           <Deslizador etiqueta="Textos por estudiante" min={0} max={12} paso={1} valor={a.libros_por_estudiante ?? 0}
             formato={(n) => String(n)} cambiar={(n) => despachar({ tipo: "actual", valor: { libros_por_estudiante: n } })} />
