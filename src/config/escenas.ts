@@ -25,13 +25,18 @@ export interface PasoTutorial {
   accion?: "clic" | "formulario";
 }
 
-export type Panel = "elegirTarea" | "alejandro" | "feria";
-export type Pantalla = "ahorroPlanes" | "ahorroLogbooks" | "queTieneHoy" | "acp" | "acpCierre" | "quienUsa" | "contenido" | "resultadosReales";
+export type Panel = "alejandro" | "feria";
+export type Pantalla = "ahorroPlanes" | "ahorroLogbooks" | "queTieneHoy" | "acp" | "acpCierre" | "docente" | "contenido" | "resultadosReales";
 
 export interface Escena {
   id: string;
   /** Lo que dice la barra de arriba: quién es usted en esta escena. */
   rol: string;
+  /**
+   * La frase del cuento, en grande en la barra (dueña, 2026-11-16): leídas en
+   * orden, las de un camino cuentan la historia. Sin ella, la barra dice `rol`.
+   */
+  titulo?: string;
   plataforma?: Plataforma;
   ir?: string;
   tutorial?: PasoTutorial[];
@@ -63,16 +68,16 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
 
   resultados: [
     { id: "acp", url: "apertura", rol: "Mejorar resultados", pantalla: "acp" },
-    {
-      id: "docente", rol: "Ahora usted es el docente", plataforma: "docentes", ir: "/task-manager/assignment", panel: "elegirTarea",
-      // Sin tutorial: el recuadro pide solo la asignatura y el tema (dos pasos).
-    },
+    // Pantalla propia (antes, un recuadro sobre el Gestor de tareas): el título, la asignatura y el tema.
+    { id: "docente", rol: "Usted es el docente", pantalla: "docente" },
     {
       id: "estudiante", rol: "Ahora usted es el estudiante", plataforma: "estudiante", ir: "/wiwiquest/question", jugar: true,
-      tutorial: [centro("Paso 2 de 3: las preguntas", "Son las preguntas reales que ve el niño, sobre lo que usted eligió. Respóndalas.")],
+      titulo: "Ahora usted es el estudiante y responde el repaso que eligió",
+      tutorial: [centro("Las preguntas", "Son las preguntas reales que ve el niño, sobre lo que usted eligió. Respóndalas.")],
     },
     {
       id: "colegio", url: "rector", rol: "Ahora usted es el rector", plataforma: "admin", ir: "/estudiantes/reportes",
+      titulo: "Ahora usted es el rector y ve cómo le fue a cada curso",
       tutorial: [
         centro("Todo, en tiempo real", "Usted tiene la información de todos sus estudiantes, al día."),
         { objetivo: { texto: "Por grado / curso" }, accion: "clic", titulo: "Mire un curso", texto: "Haga clic en «Por grado / curso»." },
@@ -81,16 +86,17 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
         { objetivo: { selector: "div.space-y-5 > div.grid" }, titulo: "Lo más relevante", texto: "Cuántos lo usan, cuánto aciertan y qué alumnos están en riesgo." },
       ],
     },
-    reporte("Paso 3 de 3: resultados reales"),
+    reporte(),
     { id: "acp-cierre", url: "cierre", rol: "Mejorar resultados", pantalla: "acpCierre" },
   ],
 
   contenido: [{ id: "taller", url: "logbooks", rol: "Sus propios Logbooks", pantalla: "contenido" }],
 
   uso: [
-    { id: "quien", rol: "Que de verdad lo usen", pantalla: "quienUsa" },
+    // Sin "¿Quién quiere que la use más?" (dueña, 2026-11-16): empieza en el estudiante.
     {
       id: "estudiante", rol: "Ahora usted es el estudiante", plataforma: "estudiante", ir: "/home", mostrar: ["refuerzo"],
+      titulo: "Usted es un estudiante y entra a la plataforma porque quiere",
       tutorial: [
         centro("Entra porque quiere", "Gana Witkis, sube en el ranking y los gasta en premios."),
         { objetivo: { selector: "main button:has(img[alt='WiwiQuest'])" }, titulo: "Aprende jugando", texto: "El refuerzo de los temas puede ser diario: retos cortos en lo que le cuesta." },
@@ -100,6 +106,7 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
     },
     {
       id: "papa", rol: "Ahora usted es un papá", plataforma: "padres", ir: "/dashboard", mostrar: ["refuerzo", "cobro"],
+      titulo: "Ahora usted es el papá y sigue al colegio desde un solo lugar",
       tutorial: [
         { objetivo: { texto: "estudiantes vinculados" }, titulo: "Un solo lugar", texto: "Sus hijos, sus docentes y los mensajes del colegio." },
         { objetivo: { selector: 'aside button[title="Agenda"]' }, titulo: "La nueva agenda", texto: "Mensajes del colegio, tareas y calendario en un solo lugar." },
@@ -109,6 +116,7 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
     },
     {
       id: "rector", rol: "Ahora usted es el rector", plataforma: "admin", ir: "/tutores/informes-uso", panel: "feria",
+      titulo: "Ahora usted es el rector y ve quién la usa, curso por curso",
       tutorial: [
         { objetivo: { texto: "Informes de uso" }, titulo: "Usted ve quién la usa", texto: "Curso por curso. Prenda la Feria en el recuadro de abajo a la derecha." },
       ],
