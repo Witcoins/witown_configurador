@@ -154,10 +154,9 @@ function paso(s: Estado, a: Accion): Estado {
     case "escena":
       return { ...s, escena: a.valor };
     case "tarea": {
-      const tarea = { ...s.tarea, ...a.valor };
-      // Otro tema = otra partida: el rector puede jugar lo que acaba de elegir.
-      const otra = tarea.asignatura !== s.tarea.asignatura || tarea.subtema !== s.tarea.subtema;
-      return { ...s, tarea, jugo: otra ? false : s.jugo };
+      // Cambiar de tema no da otra partida: se juega un tema por visita y,
+      // al volver a abrir el enlace, otro (dueña, 2026-11-16; ver `jugo` al cargar).
+      return { ...s, tarea: { ...s.tarea, ...a.valor } };
     }
     case "acepto":
       return { ...s, acepto: true };

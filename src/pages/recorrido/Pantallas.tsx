@@ -1,7 +1,7 @@
 import { useConfigurador } from "@/lib/estado";
 import { medir } from "@/lib/analitica";
 import { RESULTADOS_REALES } from "@/config/resultadosReales";
-import { BotonSiguiente, Insignia, Opcion, PantallaWiwiQuest, TarjetaPregunta } from "@/components/Pregunta";
+import { BotonSiguiente, Insignia, PantallaWiwiQuest, TarjetaPregunta } from "@/components/Pregunta";
 
 /** Rangos de precio al año (pesos). Se guarda el punto medio: la comparación del plan dice "aprox.". */
 const RANGOS = [
@@ -133,24 +133,6 @@ export function ResultadosReales({ siguiente, ultima = false }: { siguiente: () 
           ))}
         </div>
         <div className="flex justify-center"><BotonSiguiente onClick={siguiente}>{ultima ? "Conozca su precio →" : "Siguiente →"}</BotonSiguiente></div>
-      </div>
-    </PantallaWiwiQuest>
-  );
-}
-
-/** Camino Que lo usen — la única pregunta: ¿quién quiere que la use más? */
-export function QuienUsa({ siguiente }: { siguiente: () => void }) {
-  const opciones = [["padres", "Los papás"], ["estudiantes", "Los estudiantes"], ["ambos", "Ambos"]] as const;
-  return (
-    <PantallaWiwiQuest>
-      <div className="animate-aparecer space-y-5">
-        <div className="text-center"><Insignia texto="Que de verdad lo usen" /></div>
-        <TarjetaPregunta>¿Quién quiere que la use más?</TarjetaPregunta>
-        <div className="grid gap-[9px]">
-          {opciones.map(([id, t], i) => (
-            <Opcion key={id} letra={"ABC"[i]} onClick={() => { medir("uso_quien", { quien: id }); siguiente(); }}>{t}</Opcion>
-          ))}
-        </div>
       </div>
     </PantallaWiwiQuest>
   );

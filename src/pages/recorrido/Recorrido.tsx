@@ -7,8 +7,8 @@ import { OPCIONES } from "@/pages/Bienvenida";
 import { precargarEscena } from "@/lib/precalentar";
 import { Contenido } from "@/pages/caminos/Contenido";
 import { VistaPrevia, NOMBRES_PLATAFORMA, type EventoVitrina } from "@/components/VistaPrevia";
-import { Acp, AcpCierre, QueTieneHoy, QuienUsa, ResultadosReales } from "./Pantallas";
-import { Alejandro, ElegirTarea, Feria, MIN_TEMA } from "./Paneles";
+import { Acp, AcpCierre, QueTieneHoy, ResultadosReales } from "./Pantallas";
+import { Alejandro, Docente, Feria, MIN_TEMA } from "./Paneles";
 import { AhorroLogbooks, AhorroPlanes } from "./AhorroCostos";
 
 const ALTO_BARRA = 56;
@@ -93,14 +93,13 @@ export function Recorrido() {
     const seguir = () => ir(i + 1);
     return (
       <div>
-        <Barra rol={escena.rol} i={i} total={escenas.length} atras={() => ir(i - 1)} siguiente={seguir} ultima={ultima} sinSiguiente />
+        <Barra rol={escena.rol} titulo={escena.titulo} i={i} total={escenas.length} atras={() => ir(i - 1)} siguiente={seguir} ultima={ultima} sinSiguiente />
         <div style={{ paddingTop: ALTO_BARRA }}>
           {escena.pantalla === "ahorroPlanes" && <AhorroPlanes siguiente={seguir} />}
           {escena.pantalla === "ahorroLogbooks" && <AhorroLogbooks />}
           {escena.pantalla === "queTieneHoy" && <QueTieneHoy siguiente={seguir} />}
           {escena.pantalla === "acp" && <Acp siguiente={seguir} />}
           {escena.pantalla === "acpCierre" && <AcpCierre siguiente={seguir} />}
-          {escena.pantalla === "quienUsa" && <QuienUsa siguiente={seguir} />}
           {escena.pantalla === "resultadosReales" && <ResultadosReales siguiente={seguir} ultima={ultima} />}
           {escena.pantalla === "contenido" && <div className="mx-auto max-w-3xl px-4 py-8 font-nunito"><Contenido /></div>}
         </div>
@@ -116,7 +115,7 @@ export function Recorrido() {
   const tapar = escena.jugar ? jugoAlEntrar || (jugado && guiaFin) : guiaFin && !!escena.tutorial?.length;
   return (
     <div className="fixed inset-0 bg-white">
-      <Barra rol={escena.rol} plataforma={escena.plataforma ? NOMBRES_PLATAFORMA[escena.plataforma] : ""}
+      <Barra rol={escena.rol} titulo={escena.titulo} plataforma={escena.plataforma ? NOMBRES_PLATAFORMA[escena.plataforma] : ""}
         i={i} total={escenas.length} atras={() => ir(i - 1)} siguiente={() => ir(i + 1)} ultima={ultima}
         verGuia={escena.tutorial?.length && !(escena.jugar && jugoAlEntrar) ? () => setVuelta((v) => v + 1) : undefined}
         destacarSiguiente={!esperaJuego}
@@ -127,7 +126,7 @@ export function Recorrido() {
           jugar={escena.jugar && !jugoAlEntrar ? tareaOPorDefecto(estado.tarea) : null} onEvento={alEvento}
           onLista={() => setGuiaFin(false)} />
         {tapar && <div className="absolute inset-0 z-[15] cursor-not-allowed" aria-hidden />}
-        {escena.panel === "elegirTarea" && <ElegirTarea siguiente={() => ir(i + 1)} />}
+        {escena.panel === "docente" && <Docente siguiente={() => ir(i + 1)} />}
         {escena.panel === "alejandro" && <Alejandro />}
         {escena.panel === "feria" && <Feria />}
       </div>
@@ -149,8 +148,8 @@ function AvisoSiguiente({ ultima }: { ultima: boolean }) {
   );
 }
 
-function Barra({ rol, plataforma, i, total, atras, siguiente, ultima, verGuia, sinSiguiente, destacarSiguiente = true, libre }: {
-  rol: string; plataforma?: string; i: number; total: number; atras: () => void; siguiente: () => void;
+function Barra({ rol, titulo, plataforma, i, total, atras, siguiente, ultima, verGuia, sinSiguiente, destacarSiguiente = true, libre }: {
+  rol: string; titulo?: string; plataforma?: string; i: number; total: number; atras: () => void; siguiente: () => void;
   ultima: boolean; verGuia?: () => void; sinSiguiente?: boolean; destacarSiguiente?: boolean; libre?: boolean;
 }) {
   const { estado, despachar } = useConfigurador();
@@ -158,8 +157,13 @@ function Barra({ rol, plataforma, i, total, atras, siguiente, ultima, verGuia, s
     <header className="fixed inset-x-0 top-0 z-30 flex items-center gap-3 border-b border-purple-100 bg-white/95 px-3 font-nunito backdrop-blur"
       style={{ height: ALTO_BARRA }}>
       <span className="hidden text-lg font-extrabold text-[#443773] sm:inline">i'Witown</span>
-      <span className="truncate rounded-full bg-[#554884] px-3 py-1 text-sm font-bold text-white">{rol}</span>
-      {plataforma && <span className="hidden truncate text-xs text-gray-500 md:inline">{plataforma}</span>}
+      {/* Con frase del cuento, la frase en grande; si no, quién es usted. */}
+      {titulo ? (
+        <span className="line-clamp-2 min-w-0 text-sm font-extrabold leading-tight text-[#443773] sm:text-base lg:text-xl" title={rol}>{titulo}</span>
+      ) : (
+        <span className="truncate rounded-full bg-[#554884] px-3 py-1 text-sm font-bold text-white">{rol}</span>
+      )}
+      {plataforma && !titulo && <span className="hidden truncate text-xs text-gray-500 md:inline">{plataforma}</span>}
       <div className="ml-auto flex items-center gap-2">
         {libre && (
           <select aria-label="Cambiar de camino" value={estado.ruta ?? ""} onChange={(e) => despachar({ tipo: "ruta", valor: e.target.value as never })}

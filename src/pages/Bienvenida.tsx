@@ -12,7 +12,7 @@ export const OPCIONES: { ruta: Exclude<Ruta, "libre">; titulo: string }[] = [
   { ruta: "resultados", titulo: "Mejorar los resultados de mis estudiantes" },
   { ruta: "ahorro", titulo: "Ahorrar costos" },
   { ruta: "contenido", titulo: "Usar mi propio contenido" },
-  { ruta: "uso", titulo: "Que padres y estudiantes de verdad usen el material" },
+  { ruta: "uso", titulo: "Optimizar el uso de plataformas y Logbooks" },
 ];
 
 const LETRAS = ["A", "B", "C", "D"];
