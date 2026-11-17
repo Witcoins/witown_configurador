@@ -25,8 +25,8 @@ export interface PasoTutorial {
   accion?: "clic" | "formulario";
 }
 
-export type Panel = "alejandro" | "feria";
-export type Pantalla = "ahorroPlanes" | "ahorroLogbooks" | "queTieneHoy" | "acp" | "acpCierre" | "docente" | "contenido" | "resultadosReales";
+export type Panel = "docente" | "alejandro" | "feria";
+export type Pantalla = "ahorroPlanes" | "ahorroLogbooks" | "queTieneHoy" | "acp" | "acpCierre" | "contenido" | "resultadosReales";
 
 export interface Escena {
   id: string;
@@ -68,8 +68,8 @@ export const ESCENAS: Record<Exclude<Ruta, "libre">, Escena[]> = {
 
   resultados: [
     { id: "acp", url: "apertura", rol: "Mejorar resultados", pantalla: "acp" },
-    // Pantalla propia (antes, un recuadro sobre el Gestor de tareas): el título, la asignatura y el tema.
-    { id: "docente", rol: "Usted es el docente", pantalla: "docente" },
+    // El diálogo sobre el Gestor de tareas real: el título, la asignatura (carrusel) y el tema; la imagen a la derecha.
+    { id: "docente", rol: "Usted es el docente", plataforma: "docentes", ir: "/task-manager/assignment", panel: "docente" },
     {
       id: "estudiante", rol: "Ahora usted es el estudiante", plataforma: "estudiante", ir: "/wiwiquest/question", jugar: true,
       titulo: "Ahora usted es el estudiante y responde el repaso que eligió",

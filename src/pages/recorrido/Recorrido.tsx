@@ -100,7 +100,6 @@ export function Recorrido() {
           {escena.pantalla === "queTieneHoy" && <QueTieneHoy siguiente={seguir} />}
           {escena.pantalla === "acp" && <Acp siguiente={seguir} />}
           {escena.pantalla === "acpCierre" && <AcpCierre siguiente={seguir} />}
-          {escena.pantalla === "docente" && <Docente siguiente={seguir} />}
           {escena.pantalla === "resultadosReales" && <ResultadosReales siguiente={seguir} ultima={ultima} />}
           {escena.pantalla === "contenido" && <div className="mx-auto max-w-3xl px-4 py-8 font-nunito"><Contenido /></div>}
         </div>
@@ -127,6 +126,7 @@ export function Recorrido() {
           jugar={escena.jugar && !jugoAlEntrar ? tareaOPorDefecto(estado.tarea) : null} onEvento={alEvento}
           onLista={() => setGuiaFin(false)} />
         {tapar && <div className="absolute inset-0 z-[15] cursor-not-allowed" aria-hidden />}
+        {escena.panel === "docente" && <Docente siguiente={() => ir(i + 1)} />}
         {escena.panel === "alejandro" && <Alejandro />}
         {escena.panel === "feria" && <Feria />}
       </div>

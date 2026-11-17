@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { BotonSiguiente, Insignia, PantallaWiwiQuest } from "@/components/Pregunta";
 import { CONSEJOS, POR_VALIDAR } from "@/config/consejos";
 import { useConfigurador } from "@/lib/estado";
 import { leerSubtemas, type Subtema } from "@/lib/api";
@@ -20,12 +19,24 @@ const normalizar = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, 
 /** Lo mínimo que se acepta como tema escrito (lo mismo que pide configuradorJugar). */
 export const MIN_TEMA = 3;
 
+/** Asignaturas del catálogo que no salen en la demo (dueña, 2026-11-17). Se comparan sin tildes. */
+const FUERA_DE_LA_DEMO = ["actividad ludica"];
+
+/**
+ * El nombre de la asignatura en el carrusel: el catálogo trae "Lengua Castellana"
+ * y "Lengua Castellana." y se muestran como una sola. Al elegir un tema sugerido
+ * se manda el nombre tal cual está en el catálogo (el servidor lo busca exacto,
+ * y así sale del banco y no se crea con la IA).
+ */
+const nombreVisible = (a: string) => a.replace(/[.\s]+$/, "");
+
 /** La imagen del docente la pone la dueña en public/docente/ (si falta, la columna no se muestra). */
 const IMAGEN_DOCENTE = "/docente/planeando.webp";
 
 /**
- * Mejorar resultados, como docente (dueña, 2026-11-16): pantalla propia con el
- * título en grande (como la apertura) y la imagen del docente a la derecha.
+ * Mejorar resultados, como docente (dueña, 2026-11-17): el diálogo sobre la
+ * plataforma real (Gestor de tareas) con el título, y la imagen del docente a
+ * la derecha del diálogo.
  * 1) la asignatura, en un carrusel; 2) el tema: lo escribe (la IA lo revisa y
  * genera las preguntas) o elige uno de los sugeridos, que salen del banco y
  * cargan más rápido (ver configuradorJugar). Un tema por visita: si ya jugó,
@@ -44,14 +55,19 @@ export function Docente({ siguiente }: { siguiente: () => void }) {
     const t = window.setTimeout(() => { if (!listo) setSinCatalogo(true); }, 10000);
     const fin = () => { listo = true; window.clearTimeout(t); };
     leerSubtemas()
-      .then((r) => { fin(); setTemas(r.temas); if (!r.temas.length) setSinCatalogo(true); })
+      .then((r) => {
+        fin();
+        const visibles = r.temas.filter((x) => !FUERA_DE_LA_DEMO.includes(normalizar(nombreVisible(x.asignatura)).trim()));
+        setTemas(visibles);
+        if (!visibles.length) setSinCatalogo(true);
+      })
       .catch(() => { fin(); setSinCatalogo(true); });
     return () => window.clearTimeout(t);
   }, []);
   const t = estado.tarea;
   const bloqueado = estado.jugo;
-  const asignaturas = Array.from(new Set(temas.map((x) => x.asignatura)));
-  const asignatura = asignaturas.includes(t.asignatura) ? t.asignatura : "";
+  const asignaturas = Array.from(new Set(temas.map((x) => nombreVisible(x.asignatura))));
+  const asignatura = asignaturas.includes(nombreVisible(t.asignatura)) ? nombreVisible(t.asignatura) : "";
   // Con el catálogo cargado y sin asignatura, queda la primera del carrusel.
   useEffect(() => {
     if (!bloqueado && !asignatura && asignaturas.length) elegirAsignatura(asignaturas[0]);
@@ -60,36 +76,47 @@ export function Docente({ siguiente }: { siguiente: () => void }) {
   const elegido = temas.find((x) => x.asignatura === t.asignatura && x.subtema === t.subtema);
   const escrito = !!asignatura && t.subtema.trim().length >= MIN_TEMA;
   const q = normalizar(busqueda.trim());
-  const deLaAsignatura = temas.filter((x) => x.asignatura === asignatura);
-  const resultados = q ? deLaAsignatura.filter((x) => normalizar(`${x.tema} ${x.subtema}`).includes(q)) : deLaAsignatura;
+  const deLaAsignatura = temas.filter((x) => nombreVisible(x.asignatura) === asignatura);
+  // Un subtema repetido en las dos variantes del nombre sale una sola vez.
+  const unicos = deLaAsignatura.filter((x, k) => deLaAsignatura.findIndex((y) => normalizar(y.subtema) === normalizar(x.subtema)) === k);
+  const resultados = q ? unicos.filter((x) => normalizar(`${x.tema} ${x.subtema}`).includes(q)) : unicos;
+  // El nombre tal cual existe en el catálogo (el servidor lo busca exacto): el que
+  // coincide con el visible y, si solo existe con punto, ese.
+  const nombreDelCatalogo = (visible: string) =>
+    (temas.find((x) => x.asignatura === visible) ?? temas.find((x) => nombreVisible(x.asignatura) === visible))?.asignatura ?? visible;
   function elegirAsignatura(a: string) {
     if (a === asignatura) return;
     setBusqueda("");
-    despachar({ tipo: "tarea", valor: { asignatura: a, tema: "", subtema: "" } });
+    despachar({ tipo: "tarea", valor: { asignatura: nombreDelCatalogo(a), tema: "", subtema: "" } });
   }
   const escribir = (v: string) => {
     setBusqueda(v);
     const limpio = v.replace(/\s+/g, " ").trim();
-    despachar({ tipo: "tarea", valor: { asignatura, tema: limpio, subtema: limpio } });
+    // Si lo escrito es un subtema del catálogo, se manda ese (sale del banco, más rápido).
+    const igual = deLaAsignatura.find((x) => normalizar(x.subtema) === normalizar(limpio));
+    despachar({ tipo: "tarea", valor: igual
+      ? { asignatura: igual.asignatura, tema: igual.tema, subtema: igual.subtema }
+      : { asignatura: nombreDelCatalogo(asignatura), tema: limpio, subtema: limpio } });
   };
   const avisoJugado = enlace.generaciones_restantes <= 0
     ? "Por hoy ya se jugaron todas las partidas de este enlace. Vuelva mañana y podrá jugar otro tema."
     : `En esta visita ya jugó${t.subtema ? ` «${t.subtema}»` : ""}. Para jugar otro tema, vuelva a abrir su enlace.`;
 
   return (
-    <PantallaWiwiQuest ancha>
-      <div className={`animate-aparecer grid items-center gap-8 ${imagen === "si" ? "lg:grid-cols-2 lg:gap-12" : ""}`}>
-        <div className="space-y-5">
-          <div className="text-center lg:text-left"><Insignia texto="Mejorar resultados" /></div>
-          <h1 className="text-center text-3xl font-extrabold leading-tight text-[#333] lg:text-left lg:text-5xl">
-            Usted es un docente y elegirá el repaso que pondrá a sus estudiantes
-          </h1>
-          <p className="text-center text-gray-600 lg:text-left">Sus estudiantes están en Cuarto de primaria.</p>
+    <div className="absolute inset-0 z-20 overflow-y-auto bg-black/30 p-4 font-nunito">
+      <div className="flex min-h-full items-center justify-center gap-6">
+        <div className="w-full max-w-lg animate-aparecer space-y-4 rounded-2xl bg-white p-5 shadow-2xl">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-extrabold leading-tight text-[#333] lg:text-3xl">
+              Usted es un docente y elegirá el repaso que pondrá a sus estudiantes
+            </h1>
+            <p className="text-sm text-gray-600">Sus estudiantes están en Cuarto de primaria.</p>
+          </div>
 
           {bloqueado ? (
             <p role="status" className="rounded-2xl border-2 border-[#554884]/30 bg-[#554884]/5 p-4 text-sm text-[#443773]">{avisoJugado}</p>
           ) : (
-            <div className="space-y-4 rounded-2xl border-2 border-[#E6E6E6] bg-white/95 p-4">
+            <>
               <div>
                 <p className="mb-2 font-bold text-[#333]">1. Elija la asignatura</p>
                 {asignaturas.length > 0 ? (
@@ -125,24 +152,24 @@ export function Docente({ siguiente }: { siguiente: () => void }) {
                   </div>
                 </div>
               )}
-            </div>
+            </>
           )}
 
-          <div className="flex justify-center lg:justify-start">
-            <BotonSiguiente onClick={() => { if (!bloqueado) avanzar(enlace.e, "tarea-asignada", 25); siguiente(); }}
-              disabled={!bloqueado && !sinCatalogo && !elegido && !escrito}>
-              {bloqueado ? "Siguiente →" : "Poner el repaso →"}
-            </BotonSiguiente>
-          </div>
+          <button onClick={() => { if (!bloqueado) avanzar(enlace.e, "tarea-asignada", 25); siguiente(); }}
+            disabled={!bloqueado && !sinCatalogo && !elegido && !escrito}
+            className="w-full rounded-full bg-[hsl(274_85%_37%)] px-4 py-2.5 font-bold text-white disabled:opacity-50">
+            {bloqueado ? "Siguiente →" : "Poner el repaso →"}
+          </button>
         </div>
 
+        {/* La imagen del docente, a la derecha del diálogo (en pantallas anchas). */}
         {imagen !== "no" && (
           <img src={IMAGEN_DOCENTE} alt="Un docente preparando sus clases en la plataforma"
             onLoad={() => setImagen("si")} onError={() => setImagen("no")}
-            className={imagen === "si" ? "w-full rounded-2xl border-2 border-[#E6E6E6] object-cover shadow-sm" : "hidden"} />
+            className={imagen === "si" ? "hidden w-full min-w-0 max-w-xl animate-aparecer rounded-2xl object-cover shadow-2xl lg:block" : "hidden"} />
         )}
       </div>
-    </PantallaWiwiQuest>
+    </div>
   );
 }
 
